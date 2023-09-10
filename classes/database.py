@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import pandas as pd
 from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
+import classes.SilentErrorHandler as erh
 
 class Database():
 
@@ -27,17 +28,23 @@ class Database():
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super(Database, cls).__new__(cls)
-            cls._instance.initialize()
+            cls._instance.__initialize()
         return cls._instance
     
-    def initialize(self):
+    def __initialize(self):
         load_dotenv()
         self.__define_environment()
         if not self.__enviornment:
+            erh.SilentErrorHandler().log_error("Enviornment not defined")
             return False
-        self.__set_conn_params()
-        self.__set_conn_string()
-        self.__create_engine()
+        try:
+            self.__set_conn_params()
+            self.__set_conn_string()
+            self.__create_engine()
+        except (TypeError, AttributeError) as e:
+            erh.SilentErrorHandler().log_error(f"{str(e)}")
+            return None
+      
 
     def __define_environment(self):
         env = os.getenv("enviornment")
@@ -48,6 +55,7 @@ class Database():
                     self.__enviornment = env
             else:
                 print("Assigned value must be a number")
+
         else:
             print("Enviornment not defined in .env file")
 
@@ -97,16 +105,20 @@ class Database():
             self.__print_connection_info()
             return connection
         except SQLAlchemyError as e:
-            print(f"Error connecting to the database: {str(e)}")
-            self.__print_connection_info()
+            erh.SilentErrorHandler().log_error(f"Error connecting to the database: {str(e)}")
             return None
         
     def get_db_tables(self):
-        connection = self.connect()
-        if connection:
+        try:
+            connection = self.connect()
             df = pd.read_sql("SHOW TABLES", connection)
             connection.close()
             return df
+        except (TypeError, AttributeError) as e:
+            erh.SilentErrorHandler().log_error(f"{str(e)}")
+            return None
+
+
     
 
 
