@@ -1,5 +1,5 @@
 import pandas as pd
-import classes.Database as db
+import Database as db
 
 def main():
     db_instance = db.Database()
