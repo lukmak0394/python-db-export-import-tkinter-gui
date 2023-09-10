@@ -7,3 +7,5 @@
   - pip install SQLAlchemy
 # dotenv 
   - pip install dotenv
+# mysql 
+  - Create database and import world.sql

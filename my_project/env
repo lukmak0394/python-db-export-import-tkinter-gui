@@ -1,16 +1,23 @@
-
-#--------------------------------------------------------------------
-# DATABASE
-#--------------------------------------------------------------------
-
-db_host = ""
-db_name = ""
-db_user = ""
-db_pass = ""
-
 #--------------------------------------------------------------------
 # APP
 #--------------------------------------------------------------------
 
 # enviornment type: 1 for production; 2 for testing
-enviornment = 2
+# enviornment = 2
+
+#--------------------------------------------------------------------
+# DATABASE
+#--------------------------------------------------------------------
+
+# Database credentials for test env
+# db_host.test = ""
+# db_name.test = ""
+# db_user.test = ""
+# db_pass.test = ""
+
+# Database credentials for prod env
+# db_host.prod = ""
+# db_name.prod = ""
+# db_user.prod = ""
+# db_pass.prod = ""
+

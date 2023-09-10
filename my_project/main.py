@@ -7,7 +7,6 @@ def main():
     print(tables)
 
 
-
 main()
     
 
