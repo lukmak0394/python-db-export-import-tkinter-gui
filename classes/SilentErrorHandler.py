@@ -3,6 +3,7 @@ import logging
 import datetime
 import traceback
 
+# Write files to log file
 class SilentErrorHandler:
 
     __logs_folder = ""
