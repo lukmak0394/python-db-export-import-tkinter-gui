@@ -1,1 +1,2 @@
-my_project/__pycache__/
+.env
+/my_project/__pycache__

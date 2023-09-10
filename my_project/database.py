@@ -1,3 +1,5 @@
+import os
+from dotenv import load_dotenv
 import pandas as pd
 from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
@@ -11,10 +13,10 @@ class Database():
 
     # default connection parameters - to be used in test enviornment
     __conn_params = {
-        "db_host":"localhost",
-        "db_user":"root",
-        "db_pwd":"",
-        "db_name":"world"
+        "db_host":None,
+        "db_user":None,
+        "db_pwd":None,
+        "db_name":None
     }
 
     __connection_string = ""
@@ -29,28 +31,29 @@ class Database():
         return cls._instance
     
     def initialize(self):
+        load_dotenv()
         self.__define_environment()
-        self.__set_conn_params()
-        self.__set_conn_string()
-        self.__create_engine()
+        if self.__enviornment:
+            self.__set_conn_params()
+            self.__set_conn_string()
+            self.__create_engine()
 
     def __define_environment(self):
-        while True:
-            env = input("Define environment (1 - production; 2 - testing): ")
+        env = os.getenv("enviornment")
+        if bool(env):
             if env.isdigit():
                 env = int(env)
                 if env == 1 or env == 2:
                     self.__enviornment = env
-                    break
-                else:
-                    print("Please type 1 for production or 2 for testing")
             else:
-                print("Must be a number")
+                print("Defined enviornment must be a number")
+        else:
+            print("Enviornment not defined in .env file")
 
 
     def __set_conn_params(self):
         self.__enviornment == None
-        if not self.__enviornment:
+        if not self.__enviornment or self.__enviornment:
             print("Environment not defined")
             self.__define_environment()
         
@@ -59,6 +62,11 @@ class Database():
             self.__conn_params["db_user"] = input("Enter a database user (ex. root): ")
             self.__conn_params["db_pwd"] = input("Enter a database password (ex. admin): ")
             self.__conn_params["db_name"] = input("Enter a database name (ex. world): ")
+        else:
+            self.__conn_params["db_host"] = os.getenv("db_host")
+            self.__conn_params["db_user"] = os.getenv("db_user")
+            self.__conn_params["db_pwd"] = os.getenv("db_pass")
+            self.__conn_params["db_name"] = os.getenv("db_name")
 
     def __get_conn_params(self):
         return self.__conn_params
@@ -79,7 +87,13 @@ class Database():
     def connect(self):
         try:
             connection = self.__engine.connect()
-            print("Connected to database: " + self.__conn_params["db_name"] + " as user: " + self.__conn_params["db_user"])
+            if self.__enviornment == 1:
+                env_name = "production"
+            else:
+                env_name = "testing"
+            dbname = self.__conn_params["db_name"]
+            dbuser = self.__conn_params["db_user"]
+            print(f"STATUS: CONNECTED || ENVIORNMENT: {env_name} || DATABASE: {dbname} || USER: {dbuser}")
             return connection
         except SQLAlchemyError as e:
             print(f"Error connecting to the database: {str(e)}")
