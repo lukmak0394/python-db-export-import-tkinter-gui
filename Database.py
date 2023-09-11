@@ -33,17 +33,14 @@ class Database():
     
     def __initialize(self):
         load_dotenv()
-        self.__define_environment()
-        if not self.__enviornment:
-            erh.SilentErrorHandler().log_error("Enviornment not defined")
-            return False
         try:
+            self.__define_environment()
             self.__set_conn_params()
             self.__set_conn_string()
             self.__create_engine()
-        except (TypeError, AttributeError) as e:
+        except (TypeError, AttributeError, Exception) as e:
             erh.SilentErrorHandler().log_error(f"{str(e)}")
-            return None
+            return False
       
 
     def __define_environment(self):
@@ -104,29 +101,8 @@ class Database():
             self.__status = True
             self.__print_connection_info()
             return connection
-        except SQLAlchemyError as e:
+        except (SQLAlchemyError, AttributeError, TypeError, Exception) as e:
             erh.SilentErrorHandler().log_error(f"Error connecting to the database: {str(e)}")
             return None
         
-    def get_db_tables(self):
-        try:
-            connection = self.connect()
-            df = pd.read_sql("SHOW TABLES", connection)
-            connection.close()
-            return df
-        except (TypeError, AttributeError) as e:
-            erh.SilentErrorHandler().log_error(f"{str(e)}")
-            return None
 
-
-    
-
-
-    
-        
-
-    
-    
-
- 
-    
