@@ -28,15 +28,13 @@ def main():
                 tables = get_db_tables()
                 act = int(act)
                 if act == 1:
-                    ex.Export(tables).initialize()
+                    ex.Export(tables,connection).open_window()
                     break
             else:
                 print("Must be a number")
 
     display_menu()
         
-    
-
 
 main()
 
