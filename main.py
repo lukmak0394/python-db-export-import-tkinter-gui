@@ -19,8 +19,7 @@ def main():
             return None
 
     def display_menu():
-        print("****** SELECT AN ACTION TO PERFORM ******")
-        print("Available actions:")
+        print("****** SELECT AN ACTION ******")
         print("1 - export \n")
         while True:
             act = input("Your choice: ")
@@ -30,6 +29,8 @@ def main():
                 if act == 1:
                     ex.Export(tables,connection).open_window()
                     break
+                else: 
+                    print("Not allowed")
             else:
                 print("Must be a number")
 
