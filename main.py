@@ -17,10 +17,24 @@ def main():
         except (TypeError, AttributeError) as e:
             erh.SilentErrorHandler().log_error(f"{str(e)}")
             return None
-    
-    tables = get_db_tables()
 
-    ex.Export(tables,connection).initialize()
+    def display_menu():
+        print("****** SELECT AN ACTION TO PERFORM ******")
+        print("Available actions:")
+        print("1 - export \n")
+        while True:
+            act = input("Your choice: ")
+            if act.isdigit():
+                tables = get_db_tables()
+                act = int(act)
+                if act == 1:
+                    ex.Export(tables).initialize()
+                    break
+            else:
+                print("Must be a number")
+
+    display_menu()
+        
     
 
 

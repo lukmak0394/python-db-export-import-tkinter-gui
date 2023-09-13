@@ -22,18 +22,17 @@ class Export:
         1:"Excel",
         2:"CSV",
     }
+    def __init__(self,db_tables):
+        
+        if not isinstance(db_tables, list):
+            return None
+        
+        db_instance = db.Database()
 
-    def __init__(self,tables, connection):
-        if not connection:
-            return None
-        
-        if not isinstance(tables, list):
-            return None
-        
-        self.__conn = connection
+        self.__conn = db_instance.connect()
         self.__tk_window_title = "Export data from database"
         self.__tk_window = tk.Tk()
-        self.__tables_data = tables
+        self.__tables_data = db_tables
 
     def __append_db_tables_listbox(self,tables_listbox,columns_listbox,data):
         if not type(data) is list:
@@ -100,7 +99,7 @@ class Export:
         
         if self.__selected_columns and self.__selected_table and self.__export_format:
             print(f"Selected format: {self.__export_formats[self.__export_format]}")
-            self.__display_export_btn()
+     
 
     def __display_export_btn(self):
         if not self.__tk_window:
@@ -116,8 +115,9 @@ class Export:
         excel_file = f"{self.__selected_table}.xlsx"
         def export():
             if self.__export_format == 1:
-                df = pd.read_sql(f"{query}", self.__conn)
-                df.to_excel(excel_file)
+                print(query)
+                # df = pd.read_sql(f"{query}", self.__conn)
+                # df.to_excel(excel_file)
             
         
         export_btn = tk.Button(self.__tk_window, text="Export data!", command=export)
@@ -144,7 +144,7 @@ class Export:
         self.__format_columns_style(win)
      
         self.__append_db_tables_listbox(db_tables_listbox,table_columns_listbox,self.__tables_data)
-            
+
         win.mainloop()
          
 
