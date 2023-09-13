@@ -2,6 +2,7 @@ import Database as db
 import SilentErrorHandler as erh
 import tkinter as tk
 import pandas as pd
+import datetime
 import os
 
 # Export module
@@ -20,7 +21,7 @@ class Export:
     __selected_table = ""
     __selected_columns = []
 
-    __export_path = ""
+    __export_folder = "export"
 
     __export_formats = {
         1:"Excel",
@@ -61,10 +62,9 @@ class Export:
 
     def __display_db_tables_listbox(self):
         if not self.__tables_listbox or not self.__columns_listbox:
-            return None
+            return False
         
         data = self.__db_tables
-
         if len(data):
             window = self.__tk_window
             listbox = self.__tables_listbox
@@ -74,22 +74,29 @@ class Export:
 
             def save_selection():
                 self.__selected_table = ""
-                for i in listbox.curselection():
-                    self.__selected_table = listbox.get(i)
-                    print("Selected table: " + self.__selected_table)
+                selection = listbox.curselection()
+                self.__selected_table = listbox.get(selection[0])
+                date = self.__get_date()
+                print(f"{date} - selected table: {self.__selected_table}")
                 self.__insert_column_names_to_listbox()
                 
-            save_button = tk.Button(self.__tk_window, text="Save tables", command=save_selection)
+            save_button = tk.Button(window, text="Save table", command=save_selection)
             save_button.grid(row=2, column=0,sticky="nsew")
+        
+        return True
     
     def __insert_column_names_to_listbox(self):
         if not self.__conn:
             return False
         
-        df = pd.read_sql(f"SELECT COLUMN_NAME from information_schema.columns WHERE table_name = '{self.__selected_table}'", self.__conn, columns="COLUMN_NAME")
+        query = f"SELECT COLUMN_NAME FROM information_schema.columns WHERE table_name = '{self.__selected_table}'"
+        df = pd.read_sql(query, self.__conn, columns="COLUMN_NAME")
         columns = df["COLUMN_NAME"].tolist()
        
         if len(columns):
+            date = self.__get_date()
+            print(f"{date} - query: {query}")
+
             window = self.__tk_window
             listbox = self.__columns_listbox
 
@@ -99,12 +106,10 @@ class Export:
 
             def save_selection():
                 self.__selected_columns.clear()
-
                 for i in listbox.curselection():
                     self.__selected_columns.append(listbox.get(i))
+                print(f"{date} - selected columns: {str(self.__selected_columns)}")
 
-                print("Selected columns: " + str(self.__selected_columns))
-                
                 export_formats = self.__export_formats
                 i = 0
                 for key in export_formats:
@@ -115,19 +120,57 @@ class Export:
 
             save_button = tk.Button(window, text="Select columns", command=save_selection)
             save_button.grid(row=2,column=1,sticky="nsew")
+        
+        return True
     
+    def __prepare_export_query(self, columns, table):
+        query = "SELECT "
+        for column in columns:
+            query += column + ", " 
+        query = query.rstrip(", ")
+        query += f" FROM {table}"
+        return query
+
     def __export(self,format):
         
         if not format:
-            return None
+            return False
+        
+        if not os.path.exists(self.__export_folder):
+            os.mkdir(self.__export_folder)
+
+        table_name = self.__selected_table
+        date = self.__get_date()
+        columns = self.__selected_columns
+
+        subfolder_name = os.path.join(self.__export_folder, table_name)
+        if not os.path.exists(subfolder_name):
+            os.mkdir(subfolder_name)
+    
+        query = self.__prepare_export_query(columns,table_name)
+        df = pd.read_sql(f"{query}", self.__conn)
 
         if format == 1:
-            print(1)
-        elif format == 2:
-            print(2)
+            try:
+                file = os.path.join(subfolder_name, f"{date}_{table_name}.xlsx")
+                df.to_excel(file,index=True)
+            except (AttributeError, TypeError, Exception) as e:
+                erh.SilentErrorHandler().log_error(f"Error connecting to the database: {str(e)}")
+                return None
         else:
-            return None
+            try:
+                file = os.path.join(subfolder_name, f"{date}_{table_name}.csv")
+                df.to_csv(file,index=True)
+            except (AttributeError, TypeError, Exception) as e:
+                erh.SilentErrorHandler().log_error(f"Error connecting to the database: {str(e)}")
+                return None
         
+        return True
+
+    def __get_date(self):
+        date = datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S")
+        return date
+
     def __apply_columns_style(self):
         window = self.__tk_window
         window.columnconfigure(0, weight=1)
