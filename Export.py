@@ -43,6 +43,7 @@ class Export:
         self.__db_tables = tables
         self.__export_folder = os.getenv("export_folder")
 
+
     def open_window(self):
         if not self.__tk_window or not self.__conn:
             return False
@@ -127,6 +128,7 @@ class Export:
         return True
 
     def __display_export_buttons(self):
+        window = self.__tk_window
         export_formats = self.__export_formats
         i = 0
         for key in export_formats:
@@ -134,6 +136,7 @@ class Export:
             export_format_btn = tk.Button(window,text=btn_txt, command=lambda m=key: self.__export(m), bg="#0d6efd", fg="white")
             export_format_btn.grid(row=3,column=i, sticky="nsew")
             i+=1
+            
 
     def __prepare_export_query(self, columns, table):
         query = "SELECT "
@@ -196,6 +199,7 @@ class Export:
             self.__export_to_csv(subfolder_name,date,table_name,df)
 
         return True
+
 
     def __get_date(self):
         date = datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S")
