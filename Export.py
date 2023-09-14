@@ -1,6 +1,7 @@
 import Database as db
 import SilentErrorHandler as erh
 import tkinter as tk
+from tkinter import ttk
 import pandas as pd
 import datetime
 import os
@@ -28,6 +29,8 @@ class Export:
         1:"Excel",
         2:"CSV",
     }
+
+    __condition_rows_counter = 2
 
     def __init__(self,tables,connection):
         if not connection:
@@ -121,6 +124,7 @@ class Export:
                     self.__selected_columns.append(listbox.get(i))
                 print(f"{date} - selected columns: {str(self.__selected_columns)}")
                 self.__display_export_buttons()
+                self.__open_conditions_window(columns)
 
             save_button = tk.Button(window, text="Select columns", command=save_selection)
             save_button.grid(row=2,column=1,sticky="nsew")
@@ -136,6 +140,65 @@ class Export:
             export_format_btn = tk.Button(window,text=btn_txt, command=lambda m=key: self.__export(m), bg="#0d6efd", fg="white")
             export_format_btn.grid(row=3,column=i, sticky="nsew")
             i+=1
+
+    def __open_conditions_window(self,cols):
+
+        window = tk.Tk()
+
+        window.title("Set conditions")
+        window.geometry("600x200")
+
+        btn_add_row = tk.Button(window, text="Add condition row", command=lambda m=window, c=cols: self.__add_conditions_row(window,cols))
+        btn_add_row.grid(row=1, column=1, columnspan=5)
+
+        # submit_button = tk.Button(window, text="Submit", command=lambda s=stmts_select,c=cols_select,cd=condition_select,cv=cond_val_input,l=limit_input: self.__submit_query_conditions(s,c,cd,cv,l))
+        # submit_button.grid(row=2, column=1, columnspan=5)
+
+        window.mainloop()
+    
+    def __add_conditions_row(self,win,columns):
+
+        rows_counter = self.__condition_rows_counter
+
+        if(rows_counter == 2):
+            conditional_expressions = ["WHERE", "AND", "OR"]
+        else:
+            conditional_expressions = ["AND", "OR"]
+        
+        selected_expr = tk.StringVar()
+        expr_select = ttk.Combobox(win, textvariable=selected_expr, values=conditional_expressions)
+        expr_select.grid(row=rows_counter,column=1,sticky="nsew")
+
+        selected_col = tk.StringVar()
+        columns_select = ttk.Combobox(win,textvariable=selected_col,values=columns)
+        columns_select.grid(row=rows_counter,column=2,sticky="nsew")
+
+        operators = ["=", ">", "<", ">=", "<=", "LIKE","NOT LIKE"]
+        selected_operator = tk.StringVar()
+        operators_select = ttk.Combobox(win, textvariable=selected_operator, values=operators)
+        operators_select.grid(row=rows_counter,column=3,sticky="nsew")
+        
+        condition_val_input = tk.Entry(win)
+        condition_val_input.grid(row=rows_counter,column=4,sticky="nsew")
+
+        limit_input = tk.Entry(win)
+        limit_input.grid(row=rows_counter,column=5,sticky="nsew")
+
+        self.__condition_rows_counter += 1
+
+
+
+    # def __submit_query_conditions(self,stmt,col,cond,val,limit):
+    #     selected_condition_stmt = stmt.get()
+    #     selected_column = col.get()
+    #     selected_cond = cond.get()
+    #     condition_val = val.get()
+    #     query_limit = limit.get()
+
+    #     query_condition = f"{selected_condition_stmt} {selected_column} {selected_cond} {selected_cond} LIMIT {query_limit}"
+
+    #     condition_query = {"condition": query_condition}
+    #     print(condition_query)
             
 
     def __prepare_export_query(self, columns, table):
