@@ -119,20 +119,21 @@ class Export:
                 for i in listbox.curselection():
                     self.__selected_columns.append(listbox.get(i))
                 print(f"{date} - selected columns: {str(self.__selected_columns)}")
-
-                export_formats = self.__export_formats
-                i = 0
-                for key in export_formats:
-                    btn_txt = f"Export {export_formats[key]}"
-                    export_format_btn = tk.Button(window,text=btn_txt, command=lambda m=key: self.__export(m), bg="#0d6efd", fg="white")
-                    export_format_btn.grid(row=3,column=i, sticky="nsew")
-                    i+=1
+                self.__display_export_buttons()
 
             save_button = tk.Button(window, text="Select columns", command=save_selection)
             save_button.grid(row=2,column=1,sticky="nsew")
         
         return True
-    
+
+    def __display_export_buttons(self):
+        export_formats = self.__export_formats
+        i = 0
+        for key in export_formats:
+            btn_txt = f"Export {export_formats[key]}"
+            export_format_btn = tk.Button(window,text=btn_txt, command=lambda m=key: self.__export(m), bg="#0d6efd", fg="white")
+            export_format_btn.grid(row=3,column=i, sticky="nsew")
+            i+=1
 
     def __prepare_export_query(self, columns, table):
         query = "SELECT "
