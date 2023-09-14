@@ -4,6 +4,7 @@
 
 # enviornment type: 1 for production; 2 for testing
 # enviornment = 2
+# export_folder = "folder_name"
 
 #--------------------------------------------------------------------
 # DATABASE
