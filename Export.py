@@ -150,7 +150,7 @@ class Export:
         btn_add_row = Button(top, text="Add next", command=lambda m=top, c=cols: self.__add_conditions_row(m,c), bg="#0d6efd", fg="white")
         btn_add_row.grid(row=1, column=1, columnspan=4, sticky="nsew")
 
-        submit_button = Button(top, text="Submit", command=self.submit_values)
+        submit_button = Button(top, text="Submit", command=self.__submit_query_cond)
         submit_button.grid(row=2, column=1, columnspan=4, sticky="nsew")
 
         self.__add_conditions_row(top,cols)
@@ -190,7 +190,7 @@ class Export:
                
         self.__condition_rows_counter += 1
 
-    def submit_values(self):
+    def __submit_query_cond(self):
         for conditions in self.__query_conditions:
 
             expr = conditions['selected_expr'].get()
