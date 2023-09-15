@@ -31,8 +31,10 @@ class Export:
     }
 
     __query_conditions = []
-    __conditions_rows_count = 3
+    __conditions_rows_count = 4
     __queries_to_add = {}
+
+    __query_limit = None
 
     def __init__(self,tables,connection):
         if not connection:
@@ -57,10 +59,18 @@ class Export:
         win.title(self.__tk_root_window_title)
         win.geometry("800x300")
 
+        label_tables = Label(win, text="Database tables")
+        label_tables.grid(row=1, column=0, sticky="nsew")
+        label_columns = Label(win, text="Columns to select")
+        label_columns.grid(row=1, column=1, sticky="nsew")
+
         self.__tables_listbox = Listbox(win, selectmode=SINGLE)
         self.__columns_listbox = Listbox(win, selectmode=MULTIPLE)
-        self.__tables_listbox.grid(row=0, column=0, sticky="nsew")
-        self.__columns_listbox.grid(row=0, column=1, sticky="nsew")
+        self.__tables_listbox.grid(row=2, column=0, sticky="nsew")
+        self.__columns_listbox.grid(row=2, column=1, sticky="nsew")
+
+        limit_label = Label(win, text="Limit results")
+        limit_label.grid(row=4, column=0, sticky="nsew")
 
         self.__apply_columns_style()
      
@@ -78,19 +88,28 @@ class Export:
             window = self.__tk_root_window
             listbox = self.__tables_listbox
 
+            query_limit = IntVar()
+            column_select = ttk.Combobox(window,textvariable=query_limit)
+            column_select.grid(row=5,column=0, columnspan=2, sticky="nsew")
+
             for item in data:
                 listbox.insert(END, item)
 
             def save_selection():
                 self.__selected_table = ""
-                selection = listbox.curselection()
-                self.__selected_table = listbox.get(selection[0])
-                date = self.__get_date()
-                print(f"{date} - selected table: {self.__selected_table}")
-                self.__insert_column_names_to_listbox()
+                try:
+                    selection = listbox.curselection()
+                    self.__selected_table = listbox.get(selection[0])
+                    date = self.__get_date()
+                    self.__query_limit = query_limit.get()
+                    print(f"{date} - selected table: {self.__selected_table}")
+                    self.__insert_column_names_to_listbox()
+                except (IndexError, AttributeError, TypeError, Exception) as e:
+                    erh.SilentErrorHandler().log_error(f"{str(e)}")
+                    print(f"{date} - Table not selected")
                 
-            save_button = Button(window, text="Save table", command=save_selection)
-            save_button.grid(row=2, column=0,sticky="nsew")
+            save_button = Button(window, text="Select table", command=save_selection)
+            save_button.grid(row=3, column=0,sticky="nsew")
         
         return True
     
@@ -103,7 +122,7 @@ class Export:
             return False
         
         query = f"SELECT COLUMN_NAME FROM information_schema.columns WHERE table_name = '{self.__selected_table}'"
-        print(f"{date} - query: {query}")
+        print(f"{date} - columns select query query: {query}")
 
         try:
             df = pd.read_sql(query, self.__conn, columns="COLUMN_NAME")
@@ -124,12 +143,15 @@ class Export:
                 self.__selected_columns.clear()
                 for i in listbox.curselection():
                     self.__selected_columns.append(listbox.get(i))
-                print(f"{date} - selected columns: {str(self.__selected_columns)}")
-                self.__display_export_buttons()
-                self.__open_conditions_window(columns)
+                if len(self.__selected_columns):
+                    print(f"{date} - selected columns: {str(self.__selected_columns)}")
+                    self.__display_export_buttons()
+                    self.__open_conditions_window(columns)
+                else:
+                    print(f"{date} select coluns first")
 
             save_button = Button(window, text="Select columns", command=save_selection)
-            save_button.grid(row=2,column=1,sticky="nsew")
+            save_button.grid(row=3,column=1,sticky="nsew")
         
         return True
 
@@ -140,7 +162,7 @@ class Export:
         for key in export_formats:
             btn_txt = f"Export {export_formats[key]}"
             export_format_btn = Button(window,text=btn_txt, command=lambda m=key: self.__export(m), bg="#0d6efd", fg="white")
-            export_format_btn.grid(row=3,column=i, sticky="nsew")
+            export_format_btn.grid(row=7,column=i, sticky="nsew")
             i+=1
 
     def __open_conditions_window(self,cols):
@@ -154,6 +176,19 @@ class Export:
         submit_button = Button(top, text="Submit", command=self.__submit_query_conditions)
         submit_button.grid(row=2, column=1, columnspan=4, sticky="nsew")
 
+        if self.__conditions_rows_count == 4:
+            label_expr = Label(top, text="Expression")
+            label_expr.grid(row=3, column=1, sticky="nsew")
+
+            label_col = Label(top, text="Column")
+            label_col.grid(row=3, column=2, sticky="nsew")
+
+            label_operator = Label(top, text="SQL operator")
+            label_operator.grid(row=3, column=3, sticky="nsew")
+
+            label_value = Label(top, text="Value")
+            label_value.grid(row=3, column=4, sticky="nsew")
+
         self.__add_conditions_row(top,cols)
 
         top.mainloop()
@@ -161,7 +196,7 @@ class Export:
     def __add_conditions_row(self,win,columns):
         row_count = self.__conditions_rows_count
 
-        if(row_count == 3):
+        if(row_count == 4):
             conditional_expressions = ["WHERE"]
         else:
             conditional_expressions = ["AND", "OR"]
@@ -174,7 +209,7 @@ class Export:
         column_select = ttk.Combobox(win,textvariable=selected_col,values=columns, state="readonly")
         column_select.grid(row=row_count,column=2,sticky="nsew")
 
-        operators = ["=", ">", "<", ">=", "<=", "LIKE","NOT LIKE"]
+        operators = ["=", "<>", ">", "<", ">=", "<=", "LIKE","NOT LIKE"]
         selected_operator = StringVar()
         operators_select = ttk.Combobox(win, textvariable=selected_operator, values=operators, state="readonly")
         operators_select.grid(row=row_count,column=3,sticky="nsew")
@@ -200,10 +235,8 @@ class Export:
             col = conditions['selected_col'].get()
             operator = conditions['selected_operator'].get()
             val = conditions['condition_val_input'].get()
-
             self.__set_queries_to_add(expr,col,operator,val,i)
             i += 1
-        print(self.__queries_to_add)
     
     def __set_queries_to_add(self,expr,col,oper,val,i):
         query = f" {expr} {col} {oper} {val} "
@@ -217,8 +250,12 @@ class Export:
         query = query.rstrip(", ")
         query += f" FROM {table}"
 
-        for key, value in self.__queries_to_add.items():
-            query += value
+        # for key, value in self.__queries_to_add.items():
+        #     query += value
+        
+        limit = self.__query_limit
+        if int(limit) > 0:
+            query += f" LIMIT {limit}"
         
         return query
     
@@ -262,6 +299,7 @@ class Export:
             os.mkdir(subfolder_name)
     
         query = self.__prepare_export_query(columns,table_name)
+        print(f"{date} - data select query query: {query}")
         try:
             df = pd.read_sql(f"{query}", self.__conn)
         except (sqe.ProgrammingError, AttributeError, TypeError, Exception) as e:
