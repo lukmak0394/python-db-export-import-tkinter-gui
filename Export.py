@@ -151,7 +151,7 @@ class Export:
         btn_add_row = Button(top, text="Add next", command=lambda m=top, c=cols: self.__add_conditions_row(m,c), bg="#0d6efd", fg="white")
         btn_add_row.grid(row=1, column=1, columnspan=4, sticky="nsew")
 
-        submit_button = Button(top, text="Submit", command=self.__submit_query_cond)
+        submit_button = Button(top, text="Submit", command=self.__submit_query_conditions)
         submit_button.grid(row=2, column=1, columnspan=4, sticky="nsew")
 
         self.__add_conditions_row(top,cols)
@@ -162,25 +162,25 @@ class Export:
         row_count = self.__conditions_rows_count
 
         if(row_count == 3):
-            conditional_expressions = ["WHERE", "AND", "OR"]
+            conditional_expressions = ["WHERE"]
         else:
             conditional_expressions = ["AND", "OR"]
         
         selected_expression  = StringVar()
-        expr_select = ttk.Combobox(win, textvariable=selected_expression, values=conditional_expressions)
+        expr_select = ttk.Combobox(win, textvariable=selected_expression, values=conditional_expressions, state="readonly")
         expr_select.grid(row=row_count,column=1,sticky="nsew")
 
         selected_col = StringVar()
-        column_select = ttk.Combobox(win,textvariable=selected_col,values=columns)
+        column_select = ttk.Combobox(win,textvariable=selected_col,values=columns, state="readonly")
         column_select.grid(row=row_count,column=2,sticky="nsew")
 
         operators = ["=", ">", "<", ">=", "<=", "LIKE","NOT LIKE"]
         selected_operator = StringVar()
-        operators_select = ttk.Combobox(win, textvariable=selected_operator, values=operators)
+        operators_select = ttk.Combobox(win, textvariable=selected_operator, values=operators, state="readonly")
         operators_select.grid(row=row_count,column=3,sticky="nsew")
 
         condition_val = StringVar()
-        condition_val_input = Entry(win)
+        condition_val_input = Entry(win, textvariable=condition_val)
         condition_val_input.grid(row=row_count,column=4,sticky="nsew")
 
         self.__query_conditions.append({
@@ -192,17 +192,7 @@ class Export:
                
         self.__conditions_rows_count += 1
 
-        condition_val.trace_add("write", lambda *args, row=row_count-2: self.on_value_change(row))
-
-
-    def on_value_change(self, row):
-        conditions = self.__query_conditions[row]
-        new_value = conditions['condition_val'].get()
-        conditions['selected_expr'].set(new_value)
-        conditions['selected_col'].set(new_value)
-        conditions['selected_operator'].set(new_value)
-
-    def __submit_query_cond(self):
+    def __submit_query_conditions(self):
         self.__queries_to_add = {}
         i = 0
         for conditions in self.__query_conditions:
@@ -211,12 +201,14 @@ class Export:
             operator = conditions['selected_operator'].get()
             val = conditions['condition_val_input'].get()
 
-            self.__query_add(expr,col,operator,val,i)
+            self.__set_queries_to_add(expr,col,operator,val,i)
             i += 1
+        print(self.__queries_to_add)
     
-    def __query_add(self,expr,col,oper,val,i):
+    def __set_queries_to_add(self,expr,col,oper,val,i):
         query = f" {expr} {col} {oper} {val} "
         self.__queries_to_add[i] = query
+
 
     def __prepare_export_query(self, columns, table):
         query = "SELECT "
