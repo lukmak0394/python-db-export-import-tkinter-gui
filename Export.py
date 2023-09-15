@@ -30,8 +30,9 @@ class Export:
         2:"CSV",
     }
 
-    __condition_rows_counter = 3
     __query_conditions = []
+    __conditions_rows_count = 3
+    __queries_to_add = {}
 
     def __init__(self,tables,connection):
         if not connection:
@@ -158,28 +159,29 @@ class Export:
         top.mainloop()
     
     def __add_conditions_row(self,win,columns):
-        rows_counter = self.__condition_rows_counter
+        row_count = self.__conditions_rows_count
 
-        if(rows_counter == 3):
+        if(row_count == 3):
             conditional_expressions = ["WHERE", "AND", "OR"]
         else:
             conditional_expressions = ["AND", "OR"]
         
         selected_expression  = StringVar()
         expr_select = ttk.Combobox(win, textvariable=selected_expression, values=conditional_expressions)
-        expr_select.grid(row=rows_counter,column=1,sticky="nsew")
+        expr_select.grid(row=row_count,column=1,sticky="nsew")
 
         selected_col = StringVar()
         column_select = ttk.Combobox(win,textvariable=selected_col,values=columns)
-        column_select.grid(row=rows_counter,column=2,sticky="nsew")
+        column_select.grid(row=row_count,column=2,sticky="nsew")
 
         operators = ["=", ">", "<", ">=", "<=", "LIKE","NOT LIKE"]
         selected_operator = StringVar()
         operators_select = ttk.Combobox(win, textvariable=selected_operator, values=operators)
-        operators_select.grid(row=rows_counter,column=3,sticky="nsew")
+        operators_select.grid(row=row_count,column=3,sticky="nsew")
 
+        condition_val = StringVar()
         condition_val_input = Entry(win)
-        condition_val_input.grid(row=rows_counter,column=4,sticky="nsew")
+        condition_val_input.grid(row=row_count,column=4,sticky="nsew")
 
         self.__query_conditions.append({
             'selected_expr': selected_expression,
@@ -188,25 +190,33 @@ class Export:
             'condition_val_input': condition_val_input
         })
                
-        self.__condition_rows_counter += 1
+        self.__conditions_rows_count += 1
+
+        condition_val.trace_add("write", lambda *args, row=row_count-2: self.on_value_change(row))
+
+
+    def on_value_change(self, row):
+        conditions = self.__query_conditions[row]
+        new_value = conditions['condition_val'].get()
+        conditions['selected_expr'].set(new_value)
+        conditions['selected_col'].set(new_value)
+        conditions['selected_operator'].set(new_value)
 
     def __submit_query_cond(self):
+        self.__queries_to_add = {}
+        i = 0
         for conditions in self.__query_conditions:
-
             expr = conditions['selected_expr'].get()
             col = conditions['selected_col'].get()
-            oper = conditions['selected_operator'].get()
+            operator = conditions['selected_operator'].get()
             val = conditions['condition_val_input'].get()
 
-            if len(expr) and len(col) and len(oper) and len(val):
-                row_data = {
-                    "expression": conditions['selected_expr'].get(),
-                    "column": conditions['selected_col'].get(),
-                    "operator": conditions['selected_operator'].get(),
-                    "value": conditions['condition_val_input'].get()
-                }
-                print(row_data)
-
+            self.__query_add(expr,col,operator,val,i)
+            i += 1
+    
+    def __query_add(self,expr,col,oper,val,i):
+        query = f" {expr} {col} {oper} {val} "
+        self.__queries_to_add[i] = query
 
     def __prepare_export_query(self, columns, table):
         query = "SELECT "
@@ -214,6 +224,10 @@ class Export:
             query += column + ", " 
         query = query.rstrip(", ")
         query += f" FROM {table}"
+
+        for key, value in self.__queries_to_add.items():
+            query += value
+        
         return query
     
     def __export_to_excel(self, subfolder_name, date, table_name, df):
