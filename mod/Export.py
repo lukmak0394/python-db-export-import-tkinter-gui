@@ -38,14 +38,13 @@ class Export:
     __query_limit_input = None
 
     # Assign most necessary data - folder, tables, create root window
-    def __init__(self,tables,connection):
-        if not connection:
-            return None
+    def __init__(self,tables):
         
         if not isinstance(tables, list):
             return None
         
         load_dotenv()
+        connection =  db.Database().connect()
         self.__conn = connection
         self.__tk_root_window_title = "Export data from database"
         self.__tk_root_window = Tk()

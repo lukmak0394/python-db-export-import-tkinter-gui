@@ -78,7 +78,7 @@ class Database():
         self.__engine = create_engine(self.__connection_string)
 
     
-    def __print_connection_info(self):
+    def print_connection_info(self):
         db_name = self.__conn_params["db_name"]
         db_user = self.__conn_params["db_user"]
         status_name = "NOT CONNECTED"
@@ -97,7 +97,6 @@ class Database():
         try:
             connection = self.__engine.connect()
             self.__status = True
-            self.__print_connection_info()
             return connection
         except (SQLAlchemyError, AttributeError, TypeError, Exception) as e:
             erh.SilentErrorHandler().log_error(f"Error connecting to the database: {str(e)}")

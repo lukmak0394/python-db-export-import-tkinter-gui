@@ -8,7 +8,7 @@ This module is responsible for handling export data from selected database and c
 
 ### Variables description
 
-1. private **__conn** - connection - passed from main.py
+1. private **__conn** - connection - set in init
 
 2. private **__tk_root_window** - root window for Tk
 
