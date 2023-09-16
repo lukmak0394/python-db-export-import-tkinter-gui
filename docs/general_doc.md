@@ -53,6 +53,4 @@ I create it to have a desktop app that allows to connect to the database and exp
 
 ---
 
-
-
 ![](C:\Users\lmako\AppData\Roaming\marktext\images\2023-09-16-13-46-08-image.png)
