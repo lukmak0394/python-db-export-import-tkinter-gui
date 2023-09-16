@@ -111,12 +111,14 @@ class Export:
             print(f"{date} - Not connected to database")
             return False
         
-        query = f"SELECT COLUMN_NAME FROM information_schema.columns WHERE table_name = '{self.__selected_table}'"
+        query = f"SELECT * FROM information_schema.columns WHERE table_name = '{self.__selected_table}'"
         print(f"{date} - columns select query: {query}")
 
         try:
             df = pd.read_sql(query, self.__conn, columns="COLUMN_NAME")
             columns = df["COLUMN_NAME"].tolist()
+            df = pd.read_sql(query, self.__conn)
+            print(df["COLUMN_NAME"] + " - " + df["DATA_TYPE"])
         except (sqe.ProgrammingError, AttributeError, TypeError, Exception) as e:
             erh.SilentErrorHandler().log_error(f"Could not get column names from database: {str(e)}")
             return False
