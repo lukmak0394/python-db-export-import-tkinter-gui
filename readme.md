@@ -53,4 +53,5 @@ I create it to have a desktop app that allows to connect to the database and exp
 
 ---
 
-![](C:\Users\lmako\AppData\Roaming\marktext\images\2023-09-16-13-46-08-image.png)
+![obraz](https://github.com/lukmak0394/python_first_project/assets/58666224/32ff77fe-2432-4dec-8f53-c640c11d286f)
+
