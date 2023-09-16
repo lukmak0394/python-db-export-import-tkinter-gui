@@ -10,9 +10,6 @@ class SilentErrorHandler:
     
     __logs_file_name = ""
 
-    # ERR (1 - default) / WARN (2)
-    __log_type = None
-
     #log format for err ex 2023-09-10 20:39:38,239 - ERROR - TEST
     __log_format = '%(asctime)s - %(levelname)s - %(message)s'
 
