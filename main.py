@@ -2,7 +2,7 @@ import pandas as pd
 import Database as db
 import SilentErrorHandler as erh
 import tkinter as tk
-import Export as ex
+import mod.Export as ex
 
 db_instance = db.Database()
 connection = db_instance.connect()
