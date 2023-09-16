@@ -70,13 +70,6 @@ class Export:
         self.__tables_listbox.grid(row=2, column=0, sticky="nsew")
         self.__columns_listbox.grid(row=2, column=1, sticky="nsew")
 
-        # limit_label = Label(win, text="Limit results")
-        # limit_label.grid(row=4, column=0, sticky="nsew")
-        # query_limit = StringVar()
-        # query_limit_input = Entry(win,textvariable=query_limit)
-        # query_limit_input.grid(row=5,column=0, columnspan=2, sticky="nsew")
-        # self.__query_limit_input = query_limit_input
-
         self.__apply_columns_style()
         self.__display_db_tables_listbox()
 
