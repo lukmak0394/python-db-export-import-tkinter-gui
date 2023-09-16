@@ -34,7 +34,7 @@ class Export:
     __conditions_rows_count = 4
     __queries_to_add = {}
 
-    __query_limit = None
+    __query_limit_input = None
 
     def __init__(self,tables,connection):
         if not connection:
@@ -71,6 +71,10 @@ class Export:
 
         limit_label = Label(win, text="Limit results")
         limit_label.grid(row=4, column=0, sticky="nsew")
+        query_limit = StringVar()
+        query_limit_input = Entry(win,textvariable=query_limit)
+        query_limit_input.grid(row=5,column=0, columnspan=2, sticky="nsew")
+        self.__query_limit_input = query_limit_input
 
         self.__apply_columns_style()
      
@@ -88,10 +92,6 @@ class Export:
             window = self.__tk_root_window
             listbox = self.__tables_listbox
 
-            query_limit = IntVar()
-            column_select = ttk.Combobox(window,textvariable=query_limit)
-            column_select.grid(row=5,column=0, columnspan=2, sticky="nsew")
-
             for item in data:
                 listbox.insert(END, item)
 
@@ -101,7 +101,6 @@ class Export:
                     selection = listbox.curselection()
                     self.__selected_table = listbox.get(selection[0])
                     date = self.__get_date()
-                    self.__query_limit = query_limit.get()
                     print(f"{date} - selected table: {self.__selected_table}")
                     self.__insert_column_names_to_listbox()
                 except (IndexError, AttributeError, TypeError, Exception) as e:
@@ -122,7 +121,7 @@ class Export:
             return False
         
         query = f"SELECT COLUMN_NAME FROM information_schema.columns WHERE table_name = '{self.__selected_table}'"
-        print(f"{date} - columns select query query: {query}")
+        print(f"{date} - columns select query: {query}")
 
         try:
             df = pd.read_sql(query, self.__conn, columns="COLUMN_NAME")
@@ -148,7 +147,7 @@ class Export:
                     self.__display_export_buttons()
                     self.__open_conditions_window(columns)
                 else:
-                    print(f"{date} select coluns first")
+                    print("Select columns first")
 
             save_button = Button(window, text="Select columns", command=save_selection)
             save_button.grid(row=3,column=1,sticky="nsew")
@@ -164,6 +163,7 @@ class Export:
             export_format_btn = Button(window,text=btn_txt, command=lambda m=key: self.__export(m), bg="#0d6efd", fg="white")
             export_format_btn.grid(row=7,column=i, sticky="nsew")
             i+=1
+
 
     def __open_conditions_window(self,cols):
         top = Toplevel()
@@ -265,11 +265,12 @@ class Export:
 
         queries_to_add = self.__queries_to_add.items()
         if len(queries_to_add):
-            for key, value in self.__queries_to_add.items():
+            for key, value in queries_to_add:
                 query += value
-        
-        limit = self.__sanitize_string(self.__query_limit)
-        if int(limit) > 0:
+
+        limit = self.__query_limit_input.get()
+        limit = self.__sanitize_string(limit)
+        if len(limit) > 0:
             query += f" LIMIT {limit}"
         
         return query
@@ -328,6 +329,7 @@ class Export:
             self.__export_to_csv(subfolder_name,date,table_name,df)
 
         return True
+
 
     def __sanitize_string(self,txt):
         txt = str(txt)
