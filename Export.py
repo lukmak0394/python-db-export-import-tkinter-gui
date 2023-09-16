@@ -247,8 +247,10 @@ class Export:
 
             if operator.find("%") != -1:
                 operator = "LIKE"
-            
-            self.__set_queries_to_add(expr,col,operator,val,i)
+
+            if len(expr) > 0 and len(col) > 0 and len(operator) > 0:
+                self.__set_queries_to_add(expr,col,operator,val,i)
+
             i += 1
     
     def __set_queries_to_add(self,expr,col,oper,val,i):
@@ -278,8 +280,11 @@ class Export:
     def __export_to_excel(self, subfolder_name, date, table_name, df):
         try:
             file = os.path.join(subfolder_name, f"{date}_{table_name}.xlsx")
-            df.to_excel(file,index=True)
-            print(f"{date} - export successfull")
+            if(len(df) > 1):
+                df.to_excel(file,index=True)
+                print(f"{date} - export successfull - exported {len(df)} rows (including header)")
+            else:
+                print("No data to export")
         except (sqe.ProgrammingError, AttributeError, TypeError, Exception) as e:
             erh.SilentErrorHandler().log_error(f"Error with file export: {str(e)}")
             print(f"{date} - Error occoured")
@@ -288,8 +293,11 @@ class Export:
     def __export_to_csv(self, subfolder_name, date, table_name, df):
         try:
             file = os.path.join(subfolder_name, f"{date}_{table_name}.csv")
-            df.to_csv(file,index=True)
-            print(f"{date} - export successfull")
+            if(len(df) > 1):
+                df.to_csv(file,index=True)
+                print(f"{date} - export successfull - exported {len(df)} rows (including header)")
+            else:
+                print("No data to export")
         except (sqe.ProgrammingError, AttributeError, TypeError, Exception) as e:
             erh.SilentErrorHandler().log_error(f"Error with file export: {str(e)}")
             print(f"{date} - Error occoured")
