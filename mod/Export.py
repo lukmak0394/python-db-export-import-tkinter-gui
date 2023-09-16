@@ -112,8 +112,7 @@ class Export:
             return False
         
         query = f"SELECT * FROM information_schema.columns WHERE table_name = '{self.__selected_table}'"
-        print(f"{date} - columns select query: {query}")
-
+        erh.SilentErrorHandler().log_info(f"Columns select query: {query}")
         try:
             df = pd.read_sql(query, self.__conn, columns="COLUMN_NAME")
             columns = df["COLUMN_NAME"].tolist()
@@ -324,7 +323,7 @@ class Export:
         columns = self.__selected_columns
 
         query = self.__prepare_export_query(columns,table_name)
-        print(f"{date} - Data select query: {query}")
+        erh.SilentErrorHandler().log_info(f"Data select query: {query}")
 
         make_file = False
         try:
