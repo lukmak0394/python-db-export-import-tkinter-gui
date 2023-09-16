@@ -4,7 +4,6 @@ import SilentErrorHandler as erh
 import tkinter as tk
 import mod.Export as ex
 
-
 connection = db.Database().connect()
 db.Database().print_connection_info()
 
@@ -22,7 +21,6 @@ def main():
     tables = get_db_tables()
     ex.Export(tables).open_window()
     db.Database().disconnect()
-
     
 main()
 

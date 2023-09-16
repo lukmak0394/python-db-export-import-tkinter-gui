@@ -102,11 +102,11 @@ class Database():
             erh.SilentErrorHandler().log_error(f"Error connecting to the database: {str(e)}")
             return None
         
-    def disconnect(self,connection):
-        if not connection:
+    def disconnect(self):
+        if not self.conn:
             return None
         
-        connection.close()
-        print("CONNECTION CLOSED")
+        self.conn.close()
+
         
 
