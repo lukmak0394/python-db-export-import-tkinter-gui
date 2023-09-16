@@ -209,7 +209,7 @@ class Export:
         column_select = ttk.Combobox(win,textvariable=selected_col,values=columns, state="readonly")
         column_select.grid(row=row_count,column=2,sticky="nsew")
 
-        operators = ["=", "<>", ">", "<", ">=", "<=", "LIKE","NOT LIKE"]
+        operators = ["=", "<>", ">", "<", ">=", "<=", "LIKE %", "% LIKE", "%LIKE%"]
         selected_operator = StringVar()
         operators_select = ttk.Combobox(win, textvariable=selected_operator, values=operators, state="readonly")
         operators_select.grid(row=row_count,column=3,sticky="nsew")
@@ -235,6 +235,19 @@ class Export:
             col = conditions['selected_col'].get()
             operator = conditions['selected_operator'].get()
             val = self.__sanitize_string(conditions['condition_val_input'].get())
+
+            if operator == "LIKE %":
+                val = f"'{val}%'"
+            elif operator == "% LIKE":
+                val = f"'%{val}'"
+            elif operator == "%LIKE%":
+                val = f"'%{val}%'"
+            else:
+                val = f"'{val}'"
+
+            if operator.find("%") != -1:
+                operator = "LIKE"
+            
             self.__set_queries_to_add(expr,col,operator,val,i)
             i += 1
     
