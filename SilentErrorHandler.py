@@ -10,9 +10,6 @@ class SilentErrorHandler:
     
     __logs_file_name = ""
 
-    # ERR (1 - default) / WARN (2)
-    __log_type = None
-
     #log format for err ex 2023-09-10 20:39:38,239 - ERROR - TEST
     __log_format = '%(asctime)s - %(levelname)s - %(message)s'
 
@@ -40,7 +37,11 @@ class SilentErrorHandler:
 
     def log_warning(self, warning_message):
         logging.basicConfig(filename=self.__logs_file_name, level=logging.WARNING, format=self.__log_format)
-        logging.error(f"{warning_message}\n{self.__traceback}")
+        logging.warning(f"{warning_message}\n{self.__traceback}")
+    
+    def log_info(self, info_message):
+        logging.basicConfig(filename=self.__logs_file_name, level=logging.INFO, format=self.__log_format)
+        logging.info(f"{info_message}")
 
     
 

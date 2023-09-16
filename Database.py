@@ -77,8 +77,6 @@ class Database():
     def __create_engine(self):
         self.__engine = create_engine(self.__connection_string)
 
-    def __get_conn_params(self):
-        return self.__conn_params
     
     def __print_connection_info(self):
         db_name = self.__conn_params["db_name"]
