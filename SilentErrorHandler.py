@@ -40,7 +40,11 @@ class SilentErrorHandler:
 
     def log_warning(self, warning_message):
         logging.basicConfig(filename=self.__logs_file_name, level=logging.WARNING, format=self.__log_format)
-        logging.error(f"{warning_message}\n{self.__traceback}")
+        logging.warning(f"{warning_message}\n{self.__traceback}")
+    
+    def log_info(self, info_message):
+        logging.basicConfig(filename=self.__logs_file_name, level=logging.INFO, format=self.__log_format)
+        logging.info(f"{info_message}")
 
     
 

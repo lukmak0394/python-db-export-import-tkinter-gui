@@ -14,7 +14,6 @@ class Export:
 
     __tk_root_window = None
     __tk_root_window_title = ""
-    __top_level_window_open = False
     __top_level_window = None
 
     __columns_listbox = None
@@ -33,11 +32,12 @@ class Export:
     }
 
     __query_conditions = []
-    __conditions_rows_count = 4
+    __conditions_start_row = 5
     __queries_to_add = {}
 
     __query_limit_input = None
 
+    # Assign most necessary data - folder, tables, create root window
     def __init__(self,tables,connection):
         if not connection:
             return None
@@ -51,7 +51,6 @@ class Export:
         self.__tk_root_window = Tk()
         self.__db_tables = tables
         self.__export_folder = os.getenv("export_folder")
-
 
     def open_window(self):
         if not self.__tk_root_window or not self.__conn:
@@ -71,19 +70,17 @@ class Export:
         self.__tables_listbox.grid(row=2, column=0, sticky="nsew")
         self.__columns_listbox.grid(row=2, column=1, sticky="nsew")
 
-        limit_label = Label(win, text="Limit results")
-        limit_label.grid(row=4, column=0, sticky="nsew")
-        query_limit = StringVar()
-        query_limit_input = Entry(win,textvariable=query_limit)
-        query_limit_input.grid(row=5,column=0, columnspan=2, sticky="nsew")
-        self.__query_limit_input = query_limit_input
+        # limit_label = Label(win, text="Limit results")
+        # limit_label.grid(row=4, column=0, sticky="nsew")
+        # query_limit = StringVar()
+        # query_limit_input = Entry(win,textvariable=query_limit)
+        # query_limit_input.grid(row=5,column=0, columnspan=2, sticky="nsew")
+        # self.__query_limit_input = query_limit_input
 
         self.__apply_columns_style()
-     
         self.__display_db_tables_listbox()
 
         win.mainloop()
-
 
     def __display_db_tables_listbox(self):
         if not self.__tables_listbox or not self.__columns_listbox:
@@ -99,10 +96,10 @@ class Export:
 
             def save_selection():
                 self.__selected_table = ""
+                date = self.__get_date()
                 try:
                     selection = listbox.curselection()
                     self.__selected_table = listbox.get(selection[0])
-                    date = self.__get_date()
                     print(f"{date} - selected table: {self.__selected_table}")
                     self.__insert_column_names_to_listbox()
                 except (IndexError, AttributeError, TypeError, Exception) as e:
@@ -163,14 +160,13 @@ class Export:
         for key in export_formats:
             btn_txt = f"Export {export_formats[key]}"
             export_format_btn = Button(window,text=btn_txt, command=lambda m=key: self.__export(m), bg="#0d6efd", fg="white")
-            export_format_btn.grid(row=7,column=i, sticky="nsew")
+            export_format_btn.grid(row=7,column=i, rowspan=2, sticky="nsew")
             i+=1
 
     def __open_conditions_window(self,cols):
-
         refresh = False
-        if not self.__top_level_window_open:
-            self.__top_level_window_open = True
+
+        if not self.__top_level_window:
             top = Toplevel(self.__tk_root_window)
             self.__top_level_window = top
         else:
@@ -180,58 +176,65 @@ class Export:
             top.update_idletasks()
 
         top.title("Set conditions")
-        top.geometry("500x200")
+        top.geometry("550x250")
 
         btn_add_row = Button(top, text="Add next", command=lambda m=top, c=cols: self.__add_conditions_row(m,c), bg="#0d6efd", fg="white")
         btn_add_row.grid(row=1, column=1, columnspan=4, sticky="nsew")
-
         submit_button = Button(top, text="Submit", command=self.__submit_query_conditions)
         submit_button.grid(row=2, column=1, columnspan=4, sticky="nsew")
 
-        if self.__conditions_rows_count == 4:
+        if self.__conditions_start_row == 5:
+            limit_label = Label(top, text="Limit results")
+            limit_label.grid(row=3, column=1, sticky="nsew")
+            query_limit = StringVar()
+            query_limit_input = Entry(top,textvariable=query_limit)
+            query_limit_input.grid(row=3,column=2, columnspan=3, sticky="nsew")
+
+            self.__query_limit_input = query_limit_input
             label_expr = Label(top, text="Expression")
-            label_expr.grid(row=3, column=1, sticky="nsew")
+            label_expr.grid(row=4, column=1, sticky="nsew")
 
             label_col = Label(top, text="Column")
-            label_col.grid(row=3, column=2, sticky="nsew")
+            label_col.grid(row=4, column=2, sticky="nsew")
 
-            label_operator = Label(top, text="SQL operator")
-            label_operator.grid(row=3, column=3, sticky="nsew")
+            label_operator = Label(top, text="Operator")
+            label_operator.grid(row=4, column=3, sticky="nsew")
 
             label_value = Label(top, text="Value")
-            label_value.grid(row=3, column=4, sticky="nsew")
+            label_value.grid(row=4, column=4, sticky="nsew")
+
 
         if bool(refresh):
-            self.__conditions_rows_count = 4
+            self.__conditions_start_row = 5
 
         self.__add_conditions_row(top,cols)
 
         top.mainloop()
     
     def __add_conditions_row(self,win,columns):
-        row_count = self.__conditions_rows_count
+        start_row = self.__conditions_start_row
 
-        if(row_count == 4):
+        if(start_row == 5):
             conditional_expressions = ["WHERE"]
         else:
             conditional_expressions = ["AND", "OR"]
         
         selected_expression  = StringVar()
         expr_select = ttk.Combobox(win, textvariable=selected_expression, values=conditional_expressions, state="readonly")
-        expr_select.grid(row=row_count,column=1,sticky="nsew")
+        expr_select.grid(row=start_row,column=1,sticky="nsew")
 
         selected_col = StringVar()
         column_select = ttk.Combobox(win,textvariable=selected_col,values=columns, state="readonly")
-        column_select.grid(row=row_count,column=2,sticky="nsew")
+        column_select.grid(row=start_row,column=2,sticky="nsew")
 
         operators = ["=", "<>", ">", "<", ">=", "<=", "LIKE %", "% LIKE", "%LIKE%"]
         selected_operator = StringVar()
         operators_select = ttk.Combobox(win, textvariable=selected_operator, values=operators, state="readonly")
-        operators_select.grid(row=row_count,column=3,sticky="nsew")
+        operators_select.grid(row=start_row,column=3,sticky="nsew")
 
         condition_val = StringVar()
         condition_val_input = Entry(win, textvariable=condition_val)
-        condition_val_input.grid(row=row_count,column=4,sticky="nsew")
+        condition_val_input.grid(row=start_row,column=4,sticky="nsew")
 
         self.__query_conditions.append({
             'selected_expr': selected_expression,
@@ -240,7 +243,7 @@ class Export:
             'condition_val_input': condition_val_input
         })
                
-        self.__conditions_rows_count += 1
+        self.__conditions_start_row += 1
 
     def __submit_query_conditions(self):
         self.__queries_to_add = {}
@@ -295,31 +298,27 @@ class Export:
     def __export_to_excel(self, subfolder_name, date, table_name, df):
         try:
             file = os.path.join(subfolder_name, f"{date}_{table_name}.xlsx")
-            if(len(df) > 1):
-                df.to_excel(file,index=True)
-                rows = len(df)-1
-                print(f"{date} - export successfull - exported {rows} rows)")
-            else:
-                print("No data to export")
+            df.to_excel(file,index=True)
+            rows = len(df)-1
+            print(f"{date} - export successfull - exported {rows} rows. File size: {os.path.getsize(file)} B)")
+            erh.SilentErrorHandler().log_info(f"Excel from {table_name} download")
         except (sqe.ProgrammingError, AttributeError, TypeError, Exception) as e:
             erh.SilentErrorHandler().log_error(f"Error with file export: {str(e)}")
-            print(f"{date} - Error occoured")
+            print(f"{date} - Unrecognized error")
             return False
         
     def __export_to_csv(self, subfolder_name, date, table_name, df):
         try:
             file = os.path.join(subfolder_name, f"{date}_{table_name}.csv")
-            if(len(df) > 1):
-                df.to_csv(file,index=True)
-                rows = len(df)-1
-                print(f"{date} - export successfull - exported {rows} rows)")
-            else:
-                print("No data to export")
+            df.to_csv(file,index=True)
+            rows = len(df)-1
+            print(f"{date} - export successfull - exported {rows} rows. File size: {os.path.getsize(file)} B)")
+            erh.SilentErrorHandler().log_info(f"CSV from {table_name} download")
         except (sqe.ProgrammingError, AttributeError, TypeError, Exception) as e:
             erh.SilentErrorHandler().log_error(f"Error with file export: {str(e)}")
-            print(f"{date} - Error occoured")
+            print(f"{date} - Unrecognized error")
             return False
-    
+        
     def __export(self,format):
         date = self.__get_date()
 
@@ -327,31 +326,38 @@ class Export:
             print(f"{date} - Invalid format. Export aborted.")
             return False
         
-        if not os.path.exists(self.__export_folder):
-            print(f"{date} - Export folder does not exist. Creating it now...")
-            os.mkdir(self.__export_folder)
-
         table_name = self.__selected_table
         columns = self.__selected_columns
 
-        subfolder_name = os.path.join(self.__export_folder, table_name)
-        if not os.path.exists(subfolder_name):
-            print(f"{date} - Creating subfolder '{table_name}'...")
-            os.mkdir(subfolder_name)
-    
         query = self.__prepare_export_query(columns,table_name)
-        print(f"{date} - data select query query: {query}")
+        print(f"{date} - Data select query: {query}")
+
+        make_file = False
         try:
             df = pd.read_sql(f"{query}", self.__conn)
+            if(len(df) > 1):
+                make_file = True
         except (sqe.ProgrammingError, AttributeError, TypeError, Exception) as e:
             erh.SilentErrorHandler().log_error(f"Error with getting data: {str(e)}")
-            print(f"{date} - Error occoured")
+            print(f"{date} - Unrecognized error")
             return False
         
-        if format == 1:
-            self.__export_to_excel(subfolder_name,date,table_name,df)
+        if make_file:
+            if not os.path.exists(self.__export_folder):
+                print(f"{date} - Export folder does not exist. Creating it now...")
+                os.mkdir(self.__export_folder)
+                
+            subfolder_name = os.path.join(self.__export_folder, table_name)
+            if not os.path.exists(subfolder_name):
+                print(f"{date} - Creating subfolder '{table_name}'...")
+                os.mkdir(subfolder_name)
+        
+            if format == 1:
+                self.__export_to_excel(subfolder_name,date,table_name,df)
+            else:
+                self.__export_to_csv(subfolder_name,date,table_name,df)
         else:
-            self.__export_to_csv(subfolder_name,date,table_name,df)
+            print(f"{date} - No data to export")
 
         return True
 
