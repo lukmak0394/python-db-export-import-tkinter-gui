@@ -18,7 +18,7 @@ class Export:
     __columns_listbox = None
     __tables_listbox = None
 
-    __db_tables = None
+    __db_tables = []
 
     __selected_table = ""
     __selected_columns = []
@@ -234,7 +234,7 @@ class Export:
             expr = conditions['selected_expr'].get()
             col = conditions['selected_col'].get()
             operator = conditions['selected_operator'].get()
-            val = conditions['condition_val_input'].get()
+            val = self.__sanitize_string(conditions['condition_val_input'].get())
             self.__set_queries_to_add(expr,col,operator,val,i)
             i += 1
     
@@ -250,10 +250,12 @@ class Export:
         query = query.rstrip(", ")
         query += f" FROM {table}"
 
-        # for key, value in self.__queries_to_add.items():
-        #     query += value
+        queries_to_add = self.__queries_to_add.items()
+        if len(queries_to_add):
+            for key, value in self.__queries_to_add.items():
+                query += value
         
-        limit = self.__query_limit
+        limit = self.__sanitize_string(self.__query_limit)
         if int(limit) > 0:
             query += f" LIMIT {limit}"
         
@@ -314,6 +316,15 @@ class Export:
 
         return True
 
+    def __sanitize_string(self,txt):
+        txt = str(txt)
+        txt = txt.replace("DROP"," ")
+        txt = txt.replace("DELETE"," ")
+        txt = txt.replace("UPDATE"," ")
+        txt = txt.replace(";"," ")
+        txt = txt.replace("`", " ")
+        txt = txt.replace("\""," ")
+        return txt
 
     def __get_date(self):
         date = datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S")
