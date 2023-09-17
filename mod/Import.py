@@ -96,12 +96,13 @@ class Import(core.Module):
         for key, file_ext in self.__import_formats.items():
             filetypes.append((f"File types", f"*{file_ext}"))
             
-        file_path = filedialog.askopenfilename(filetypes=filetypes)
+        file_path = filedialog.askopenfilename(filetypes=filetypes, multiple=True)
         if file_path:
             try:
-                dest = os.path.join(import_folder,os.path.basename(file_path))
-                shutil.copy(file_path,dest)
-                print(f"{date} = moved file: {file_path} to {dest}")
+                for file in file_path:
+                    dest = os.path.join(import_folder,os.path.basename(file))
+                    shutil.copy(file,dest)
+                    print(f"{date} = moved file: {file} to {dest}")
                 self.__show_existing_files()  
             except (TypeError, AttributeError, Exception) as e:
                 print(f"{date} - Something went wrong, try again")
