@@ -2,13 +2,12 @@ import os
 import pandas as pd
 from tkinter import *
 from tkinter import filedialog
-import datetime
 from dotenv import load_dotenv
-import SilentErrorHandler as erh
 import shutil
+import mod.Module as core
+import SilentErrorHandler as erh
 
-
-class Import:
+class Import(core.Module):
 
     __root_import_window = None
 
@@ -50,7 +49,7 @@ class Import:
         self.__files_list_listbox = Listbox(win, selectmode=SINGLE)
         self.__files_list_listbox.grid(column=0,row=3, columnspan=2, sticky="nsew")
 
-        date = self.__get_date()
+        date = super()._get_date()
         def save_selection():
             try:
                 file_list = self.__files_list_listbox
@@ -90,41 +89,26 @@ class Import:
         return True
 
     def __upload_new(self):
-        date = self.__get_date()
+        date = super()._get_date()
         import_folder = self.__import_folder
 
-        xslx_ext = self.__import_formats[1]
-        csv_ext = self.__import_formats[2]
-
-        file_path = filedialog.askopenfilename(filetypes=[("CSV Files", f"*{csv_ext}"), ("Excel Files", f"*{xslx_ext}")])
+        filetypes = []
+        for key, file_ext in self.__import_formats.items():
+            filetypes.append((f"File types", f"*{file_ext}"))
+            
+        file_path = filedialog.askopenfilename(filetypes=filetypes, multiple=True)
         if file_path:
             try:
-                dest = os.path.join(import_folder,os.path.basename(file_path))
-                shutil.move(file_path, dest)
-                print(f"{date} = moved file: {file_path} to {dest}")
+                for file in file_path:
+                    dest = os.path.join(import_folder,os.path.basename(file))
+                    shutil.copy(file,dest)
+                    print(f"{date} = moved file: {file} to {dest}")
                 self.__show_existing_files()  
             except (TypeError, AttributeError, Exception) as e:
                 print(f"{date} - Something went wrong, try again")
                 erh.SilentErrorHandler.log_error(f"{str(e)}")
     
-
     def __create_import_folder(self):
-        if not os.path.exists(self.__import_folder):
-            date = self.__get_date()
-            print(f"{date} - creating import folder...")
-            os.mkdir(self.__import_folder)
-
-    def __sanitize_string(self,txt):
-        txt = str(txt)
-        txt = txt.replace("DROP"," ")
-        txt = txt.replace("DELETE"," ")
-        txt = txt.replace("UPDATE"," ")
-        txt = txt.replace(";"," ")
-        txt = txt.replace("`", " ")
-        txt = txt.replace("\""," ")
-        return txt
-
-    def __get_date(self):
-        date = datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S")
-        return date
+        date = super()._get_date()
+        super()._create_folder(self.__import_folder,f"{date} - creating import folder...")
         
