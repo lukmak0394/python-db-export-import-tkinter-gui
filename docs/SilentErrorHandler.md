@@ -25,5 +25,3 @@ private **__log_format** - format for logging messages in log file. time, level 
 5. protected **__log_info** - responsible for logging info messages. Do not use traceback. This is not required here - simply log user defined log message.
 
 6. 
-   
-   
