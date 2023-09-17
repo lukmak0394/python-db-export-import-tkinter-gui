@@ -1,6 +1,7 @@
 /logs
 /export
 /import
+/excel_files
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

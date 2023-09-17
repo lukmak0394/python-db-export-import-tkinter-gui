@@ -4,9 +4,6 @@ import SilentErrorHandler as erh
 
 class Module():
 
-    def __init__(self):
-        print("CREATED")
-
     def _create_folder(self,folder_path,message):
         if not len(folder_path):
             return False
