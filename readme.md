@@ -51,7 +51,7 @@ I create it to have a desktop app that allows to connect to the database and exp
 
 4. **Export.py**- export module. It is responsible for handling operations related to data export.: selecting columns to export, adding conditions, etc.
 
-5. **Module.py** - core class for both modules
+5. **Import.py** - module responsible for handling import to database
 
 ---
 
