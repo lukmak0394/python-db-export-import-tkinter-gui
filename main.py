@@ -7,14 +7,19 @@ import mod.Import as importer
 db_instance = db.Database()
 connection = db_instance.connect()
 db_instance.print_connection_info()
-import mod.Import as importer
 
 def main():
-    importer.Import().open_import_window()
+    def get_db_tables():
+        try:
+            df = pd.read_sql("SHOW TABLES", connection, columns=["Tables_in_world"])
+            result = df["Tables_in_world"].tolist()
+            return result
+        except (TypeError, AttributeError) as e:
+            erh.SilentErrorHandler().log_error(f"{str(e)}")
+            return None
 
-    # tables = get_db_tables()
-    # exporter.Export(tables).open_window()
-
+    tables = get_db_tables()
+    exporter.Export(tables).open_window()
     importer.Import().open_import_window()
 
     

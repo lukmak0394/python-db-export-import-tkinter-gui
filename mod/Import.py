@@ -49,7 +49,7 @@ class Import(core.Module):
         self.__files_list_listbox = Listbox(win, selectmode=SINGLE)
         self.__files_list_listbox.grid(column=0,row=3, columnspan=2, sticky="nsew")
 
-        date = self.__get_date()
+        date = super()._get_date()
         def save_selection():
             try:
                 file_list = self.__files_list_listbox
@@ -109,22 +109,8 @@ class Import(core.Module):
                 erh.SilentErrorHandler.log_error(f"{str(e)}")
     
     def __create_import_folder(self):
-        if not os.path.exists(self.__import_folder):
-            date = self.__get_date()
-            print(f"{date} - creating import folder...")
-            os.mkdir(self.__import_folder)
+        date = super()._get_date()
+        super()._create_folder(self.__import_folder,f"{date} - creating import folder...")
 
-    def __sanitize_string(self,txt):
-        txt = str(txt)
-        txt = txt.replace("DROP"," ")
-        txt = txt.replace("DELETE"," ")
-        txt = txt.replace("UPDATE"," ")
-        txt = txt.replace(";"," ")
-        txt = txt.replace("`", " ")
-        txt = txt.replace("\""," ")
-        return txt
 
-    def __get_date(self):
-        date = datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S")
-        return date
         
