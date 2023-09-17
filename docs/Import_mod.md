@@ -29,5 +29,3 @@ This module is responsible for handling import data to database tables.
 2. private **__show_existing_files** - show files existing in import folder.
 3. private **__upload_new** - handle new file uploading. Once uploaded refresh existing files list.
 4. private **__create_import_folder** - create folder for imported files (call in init).
-5. private **__sanitize_string** - sanitize user input (in condition value and limit value) - prevent sql injection.
-6. private **__get_date** - get current date in defined format to be used in printing info to console.
