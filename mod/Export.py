@@ -1,14 +1,15 @@
 import os
 from dotenv import load_dotenv
-import Database as db
-import SilentErrorHandler as erh
 from tkinter import *
 from tkinter import ttk
 import pandas as pd
 import datetime
 import sqlalchemy.exc as sqe
+import Database as db
+import SilentErrorHandler as erh
+import mod.Module as core
 
-class Export:
+class Export(core.Module):
 
     __conn = None
 
@@ -86,9 +87,9 @@ class Export:
             for item in data:
                 listbox.insert(END, item)
 
+            date = super()._get_date()
             def save_selection():
                 self.__selected_table = ""
-                date = self.__get_date()
                 try:
                     selection = listbox.curselection()
                     self.__selected_table = listbox.get(selection[0])
@@ -105,7 +106,7 @@ class Export:
     
 
     def __insert_column_names_to_listbox(self):
-        date = self.__get_date()
+        date = super()._get_date()
 
         if not self.__conn:
             print(f"{date} - Not connected to database")
@@ -245,7 +246,7 @@ class Export:
             expr = conditions['selected_expr'].get()
             col = conditions['selected_col'].get()
             operator = conditions['selected_operator'].get()
-            val = self.__sanitize_string(conditions['condition_val_input'].get())
+            val = super()._sanitize_string(conditions['condition_val_input'].get())
 
             if operator == "LIKE %":
                 val = f"'{val}%'"
@@ -282,7 +283,8 @@ class Export:
                 query += value
 
         limit = self.__query_limit_input.get()
-        limit = self.__sanitize_string(limit)
+        limit = super()._sanitize_string(limit)
+        
         if len(limit) > 0:
             query += f" LIMIT {limit}"
         
@@ -313,7 +315,7 @@ class Export:
             return False
         
     def __export(self,format):
-        date = self.__get_date()
+        date = super()._get_date()
 
         if not format:
             print(f"{date} - Invalid format. Export aborted.")
@@ -336,15 +338,10 @@ class Export:
             return False
         
         if make_file:
-            if not os.path.exists(self.__export_folder):
-                print(f"{date} - Export folder does not exist. Creating it now...")
-                os.mkdir(self.__export_folder)
-                
+            super()._create_folder(self.__export_folder,f"{date} - Export folder does not exist. Creating it now...")
             subfolder_name = os.path.join(self.__export_folder, table_name)
-            if not os.path.exists(subfolder_name):
-                print(f"{date} - Creating subfolder '{table_name}'...")
-                os.mkdir(subfolder_name)
-        
+            super()._create_folder(subfolder_name,f"{date} - Creating subfolder '{table_name}...")
+
             if format == 1:
                 self.__export_to_excel(subfolder_name,date,table_name,df)
             else:
@@ -353,21 +350,6 @@ class Export:
             print(f"{date} - No data to export")
 
         return True
-
-
-    def __sanitize_string(self,txt):
-        txt = str(txt)
-        txt = txt.replace("DROP"," ")
-        txt = txt.replace("DELETE"," ")
-        txt = txt.replace("UPDATE"," ")
-        txt = txt.replace(";"," ")
-        txt = txt.replace("`", " ")
-        txt = txt.replace("\""," ")
-        return txt
-
-    def __get_date(self):
-        date = datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S")
-        return date
 
     def __apply_columns_style(self):
         window = self.__tk_root_window
