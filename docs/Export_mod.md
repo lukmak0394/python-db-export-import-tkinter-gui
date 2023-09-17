@@ -53,10 +53,4 @@ This module is responsible for handling export data from selected database and c
 9. private **__prepare_export_query** - prepare query to retreive data from db for selected column - include limit and conditions if defined.
 10. private **__export_to_excel/csv** - actual export for selected format.
 11. private **__export** - get data to export for prepared query, make folders, call method that handles export for selected format. Files are saved to export dir and inside to subfolder for selected table name.
-12. private **__sanitize_string** - sanitize user input (in condition value and limit value) - prevent sql injection.
-13. private **__get_date** - get current date in defined format to be used in printing info to console.
-14. private **__apply_columns_style** - apply styling for columns in root tk window.
-
----
-
-### 
+12. private **__apply_columns_style** - apply styling for columns in root tk window.
