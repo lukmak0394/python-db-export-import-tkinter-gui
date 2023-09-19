@@ -119,6 +119,7 @@ class Export(core.Module):
             columns = df["COLUMN_NAME"].tolist()
             df = pd.read_sql(query, self.__conn)
             print(df["COLUMN_NAME"] + " - " + df["DATA_TYPE"])
+
         except (sqe.ProgrammingError, AttributeError, TypeError, Exception) as e:
             erh.SilentErrorHandler().log_error(f"Could not get column names from database: {str(e)}")
             return False

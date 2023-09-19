@@ -31,3 +31,9 @@ class Module():
     def _get_date(self):
         date = datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S")
         return date
+    
+    def _print_user_message(self,msg):
+        date = self._get_date()
+        if not msg:
+            print(f"{date}")
+        print(f"{date} - {msg}")
