@@ -29,7 +29,7 @@ class Module():
         if not isinstance(tables, list):
             return None
         self._db_tables = tables
-        
+    
     def _open_root_window(self,title):
         if not self._conn:
             return False

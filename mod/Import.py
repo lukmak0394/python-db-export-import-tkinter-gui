@@ -27,7 +27,7 @@ class Import(core.Module):
         super()._create_folder(self.__import_folder,"creating import folder...")
 
 
-    def open_import_window(self):
+    def open_window(self):
         super()._open_root_window("Import")
     
     def _save_columns(self):
