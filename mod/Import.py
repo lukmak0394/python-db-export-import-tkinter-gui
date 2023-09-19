@@ -12,7 +12,7 @@ import SilentErrorHandler as erh
 class Import(core.Module):
 
     __import_formats = {
-        2:".csv",
+        1:".csv",
     }
     __import_folder = ""
 
