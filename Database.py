@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import pandas as pd
 from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
+from urllib.parse import quote  
 import SilentErrorHandler as erh
 
 class Database():
@@ -72,8 +73,8 @@ class Database():
         user = self.__conn_params["db_user"]
         pwd = self.__conn_params["db_pwd"] 
         name = self.__conn_params["db_name"]
-        self.__connection_string = "mysql+mysqlconnector://" + user + ":"+ pwd + "@" + host + "/" + name
-
+        self.__connection_string = "mysql+mysqlconnector://" + user + ":" + quote(pwd) + "@" + host + "/" + name
+        
     def __create_engine(self):
         self.__engine = create_engine(self.__connection_string)
 
@@ -107,6 +108,15 @@ class Database():
             return None
         
         self.conn.close()
+        
+    def get_tables(self, conn):
+        try:
+            dbname = self.__conn_params["db_name"]
+            df = pd.read_sql("SHOW TABLES", conn, columns=f"Tables_in_{dbname}")
+            return df[f"Tables_in_{dbname}"].tolist()
+        except (TypeError, AttributeError) as e:
+            erh.SilentErrorHandler().log_error(f"{str(e)}")
+            return None
 
         
 
