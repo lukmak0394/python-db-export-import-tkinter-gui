@@ -5,23 +5,12 @@ from tkinter import ttk
 import pandas as pd
 import datetime
 import sqlalchemy.exc as sqe
-import Database as db
 import SilentErrorHandler as erh
 import mod.Module as core
 
 class Export(core.Module):
 
-    __root_export_window = None
-    __root_export_window_title = ""
     __top_level_window = None
-
-    __columns_listbox = None
-    __tables_listbox = None
-
-    __db_tables = []
-
-    __selected_table = ""
-    __selected_columns = []
 
     __export_folder = ""
 
@@ -36,118 +25,20 @@ class Export(core.Module):
 
     __query_limit_input = None
 
-    # Assign most necessary data - folder, tables, create root window
-    def __init__(self,tables):
-        
-        if not isinstance(tables, list):
-            return None
+    def __init__(self):
         super().__init__()
-
         load_dotenv()
-        self.__root_export_window_title = "Export data from database"
-        self.__root_export_window = Tk()
-        self.__db_tables = tables
-        self.__export_folder = os.getenv("export_folder")
 
     def open_export_window(self):
-        if not self.__root_export_window or not self._conn:
-            return False
-        
-        win = self.__root_export_window
-        win.title(self.__root_export_window_title)
-        win.geometry("800x300")
-
-        label_tables = Label(win, text="Database tables")
-        label_tables.grid(row=1, column=0, sticky="nsew")
-        label_columns = Label(win, text="Columns to select")
-        label_columns.grid(row=1, column=1, sticky="nsew")
-
-        self.__tables_listbox = Listbox(win, selectmode=SINGLE)
-        self.__columns_listbox = Listbox(win, selectmode=MULTIPLE)
-        self.__tables_listbox.grid(row=2, column=0, sticky="nsew")
-        self.__columns_listbox.grid(row=2, column=1, sticky="nsew")
-
-        self.__apply_columns_style()
-        self.__display_db_tables_listbox()
-
-        win.mainloop()
-
-    def __display_db_tables_listbox(self):
-        if not self.__tables_listbox or not self.__columns_listbox:
-            return False
-        
-        data = self.__db_tables
-        if len(data):
-            window = self.__root_export_window
-            listbox = self.__tables_listbox
-
-            for item in data:
-                listbox.insert(END, item)
-
-            date = super()._get_date()
-            def save_selection():
-                self.__selected_table = ""
-                try:
-                    selection = listbox.curselection()
-                    self.__selected_table = listbox.get(selection[0])
-                    print(f"{date} - selected table: {self.__selected_table}")
-                    self.__insert_column_names_to_listbox()
-                except (IndexError, AttributeError, TypeError, Exception) as e:
-                    erh.SilentErrorHandler().log_error(f"{str(e)}")
-                    print(f"{date} - Table not selected")
-                
-            save_button = Button(window, text="Select table", command=save_selection)
-            save_button.grid(row=3, column=0,sticky="nsew")
-        
-        return True
+        super()._open_root_window("Export data from database")
     
-
-    def __insert_column_names_to_listbox(self):
-        date = super()._get_date()
-
-        if not self._conn:
-            super()._print_user_message("Not connected to database")
-            return False
-        
-        query = f"SELECT * FROM information_schema.columns WHERE table_name = '{self.__selected_table}'"
-        erh.SilentErrorHandler().log_info(f"Columns select query: {query}")
-        try:
-            df = pd.read_sql(query, self._conn, columns="COLUMN_NAME")
-            columns = df["COLUMN_NAME"].tolist()
-            df = pd.read_sql(query, self._conn)
-            print(df["COLUMN_NAME"] + " - " + df["DATA_TYPE"])
-
-
-        except (sqe.ProgrammingError, AttributeError, TypeError, Exception) as e:
-            erh.SilentErrorHandler().log_error(f"Could not get column names from database: {str(e)}")
-            return False
-       
-        if len(columns):
-            window = self.__root_export_window
-            listbox = self.__columns_listbox
-
-            listbox.delete(0, END)
-            for column in columns:
-                listbox.insert(END, column)
-
-            def save_selection():
-                self.__selected_columns.clear()
-                for i in listbox.curselection():
-                    self.__selected_columns.append(listbox.get(i))
-                if len(self.__selected_columns):
-                    print(f"{date} - selected columns: {str(self.__selected_columns)}")
-                    self.__display_export_buttons()
-                    self.__open_conditions_window(columns)
-                else:
-                    print("Select columns first")
-
-            save_button = Button(window, text="Select columns", command=save_selection)
-            save_button.grid(row=3,column=1,sticky="nsew")
-        
-        return True
+    def _save_columns(self):
+        super()._save_columns()
+        self.__display_export_buttons()
+        self.__open_conditions_window(self._selected_columns)
 
     def __display_export_buttons(self):
-        window = self.__root_export_window
+        window = self._root_win
         export_formats = self.__export_formats
         i = 0
         for key in export_formats:
@@ -160,7 +51,7 @@ class Export(core.Module):
         refresh = False
 
         if not self.__top_level_window:
-            top = Toplevel(self.__root_export_window)
+            top = Toplevel(self._root_win)
             self.__top_level_window = top
         else:
             refresh = True
@@ -321,8 +212,8 @@ class Export(core.Module):
             super()._print_user_message("Invalid format. Export aborted")
             return False
         
-        table_name = self.__selected_table
-        columns = self.__selected_columns
+        table_name = self._selected_table
+        columns = self._selected_columns
 
         query = self.__prepare_export_query(columns,table_name)
         erh.SilentErrorHandler().log_info(f"Data select query: {query}")
@@ -351,9 +242,5 @@ class Export(core.Module):
 
         return True
 
-    def __apply_columns_style(self):
-        window = self.__root_export_window
-        window.columnconfigure(0, weight=1)
-        window.columnconfigure(1, weight=1)
 
   

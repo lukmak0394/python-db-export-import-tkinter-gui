@@ -10,10 +10,8 @@ db_instance.print_connection_info()
 
 def main():
 
-    tables = db_instance.get_tables(connection)
-    db_instance.disconnect(connection)
-    # exporter.Export(tables).open_export_window()
-    importer.Import().open_import_window()
+    exporter.Export().open_export_window()
+    # importer.Import().open_import_window()
 
     
 main()
