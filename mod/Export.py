@@ -11,8 +11,8 @@ import mod.Module as core
 
 class Export(core.Module):
 
-    __tk_root_window = None
-    __tk_root_window_title = ""
+    __root_export_window = None
+    __root_export_window_title = ""
     __top_level_window = None
 
     __columns_listbox = None
@@ -44,17 +44,17 @@ class Export(core.Module):
         super().__init__()
 
         load_dotenv()
-        self.__tk_root_window_title = "Export data from database"
-        self.__tk_root_window = Tk()
+        self.__root_export_window_title = "Export data from database"
+        self.__root_export_window = Tk()
         self.__db_tables = tables
         self.__export_folder = os.getenv("export_folder")
 
-    def open_window(self):
-        if not self.__tk_root_window or not self._conn:
+    def open_export_window(self):
+        if not self.__root_export_window or not self._conn:
             return False
         
-        win = self.__tk_root_window
-        win.title(self.__tk_root_window_title)
+        win = self.__root_export_window
+        win.title(self.__root_export_window_title)
         win.geometry("800x300")
 
         label_tables = Label(win, text="Database tables")
@@ -78,7 +78,7 @@ class Export(core.Module):
         
         data = self.__db_tables
         if len(data):
-            window = self.__tk_root_window
+            window = self.__root_export_window
             listbox = self.__tables_listbox
 
             for item in data:
@@ -123,7 +123,7 @@ class Export(core.Module):
             return False
        
         if len(columns):
-            window = self.__tk_root_window
+            window = self.__root_export_window
             listbox = self.__columns_listbox
 
             listbox.delete(0, END)
@@ -147,7 +147,7 @@ class Export(core.Module):
         return True
 
     def __display_export_buttons(self):
-        window = self.__tk_root_window
+        window = self.__root_export_window
         export_formats = self.__export_formats
         i = 0
         for key in export_formats:
@@ -160,7 +160,7 @@ class Export(core.Module):
         refresh = False
 
         if not self.__top_level_window:
-            top = Toplevel(self.__tk_root_window)
+            top = Toplevel(self.__root_export_window)
             self.__top_level_window = top
         else:
             refresh = True
@@ -352,7 +352,7 @@ class Export(core.Module):
         return True
 
     def __apply_columns_style(self):
-        window = self.__tk_root_window
+        window = self.__root_export_window
         window.columnconfigure(0, weight=1)
         window.columnconfigure(1, weight=1)
 
