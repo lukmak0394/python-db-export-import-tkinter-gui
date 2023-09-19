@@ -103,11 +103,11 @@ class Database():
             erh.SilentErrorHandler().log_error(f"Error connecting to the database: {str(e)}")
             return None
         
-    def disconnect(self):
-        if not self.conn:
+    def disconnect(self,connection):
+        if not connection:
             return None
         
-        self.conn.close()
+        connection.close()
         
     def get_tables(self, conn):
         try:

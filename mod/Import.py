@@ -102,15 +102,16 @@ class Import(core.Module):
                 for file in file_path:
                     dest = os.path.join(import_folder,os.path.basename(file))
                     shutil.copy(file,dest)
-                    print(f"{date} = moved file: {file} to {dest}")
+                    super()._print_user_message(f"moved file: {file} to {dest}")
                 self.__show_existing_files()  
             except (TypeError, AttributeError, Exception) as e:
                 print(f"{date} - Something went wrong, try again")
+                super()._print_user_message("Something went wrong, try again")
                 erh.SilentErrorHandler.log_error(f"{str(e)}")
     
     def __create_import_folder(self):
         date = super()._get_date()
-        super()._create_folder(self.__import_folder,f"{date} - creating import folder...")
+        super()._create_folder(self.__import_folder,"creating import folder...")
 
 
         

@@ -11,8 +11,9 @@ db_instance.print_connection_info()
 def main():
 
     tables = db_instance.get_tables(connection)
-    exporter.Export(tables).open_window()
-    # importer.Import().open_import_window()
+    db_instance.disconnect(connection)
+    # exporter.Export(tables).open_window()
+    importer.Import().open_import_window()
 
     
 main()

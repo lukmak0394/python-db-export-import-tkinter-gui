@@ -11,8 +11,6 @@ import mod.Module as core
 
 class Export(core.Module):
 
-    __conn = None
-
     __tk_root_window = None
     __tk_root_window_title = ""
     __top_level_window = None
@@ -43,17 +41,16 @@ class Export(core.Module):
         
         if not isinstance(tables, list):
             return None
-        
+        super().__init__()
+
         load_dotenv()
-        connection =  db.Database().connect()
-        self.__conn = connection
         self.__tk_root_window_title = "Export data from database"
         self.__tk_root_window = Tk()
         self.__db_tables = tables
         self.__export_folder = os.getenv("export_folder")
 
     def open_window(self):
-        if not self.__tk_root_window or not self.__conn:
+        if not self.__tk_root_window or not self._conn:
             return False
         
         win = self.__tk_root_window
@@ -108,17 +105,18 @@ class Export(core.Module):
     def __insert_column_names_to_listbox(self):
         date = super()._get_date()
 
-        if not self.__conn:
-            print(f"{date} - Not connected to database")
+        if not self._conn:
+            super()._print_user_message("Not connected to database")
             return False
         
         query = f"SELECT * FROM information_schema.columns WHERE table_name = '{self.__selected_table}'"
         erh.SilentErrorHandler().log_info(f"Columns select query: {query}")
         try:
-            df = pd.read_sql(query, self.__conn, columns="COLUMN_NAME")
+            df = pd.read_sql(query, self._conn, columns="COLUMN_NAME")
             columns = df["COLUMN_NAME"].tolist()
-            df = pd.read_sql(query, self.__conn)
+            df = pd.read_sql(query, self._conn)
             print(df["COLUMN_NAME"] + " - " + df["DATA_TYPE"])
+
 
         except (sqe.ProgrammingError, AttributeError, TypeError, Exception) as e:
             erh.SilentErrorHandler().log_error(f"Could not get column names from database: {str(e)}")
@@ -296,11 +294,12 @@ class Export(core.Module):
             file = os.path.join(subfolder_name, f"{date}_{table_name}.xlsx")
             df.to_excel(file,index=True)
             rows = len(df)-1
-            print(f"{date} - export successfull - exported {rows} rows. File size: {os.path.getsize(file)} B)")
+            super()._print_user_message(f"export successfull - exported {rows} rows. File size: {os.path.getsize(file)} B")
+
             erh.SilentErrorHandler().log_info(f"Excel from {table_name} download")
         except (sqe.ProgrammingError, AttributeError, TypeError, Exception) as e:
             erh.SilentErrorHandler().log_error(f"Error with file export: {str(e)}")
-            print(f"{date} - Unrecognized error")
+            super()._print_user_message("Unrecognized error")
             return False
         
     def __export_to_csv(self, subfolder_name, date, table_name, df):
@@ -308,18 +307,18 @@ class Export(core.Module):
             file = os.path.join(subfolder_name, f"{date}_{table_name}.csv")
             df.to_csv(file,index=True)
             rows = len(df)-1
-            print(f"{date} - export successfull - exported {rows} rows. File size: {os.path.getsize(file)} B)")
+            super()._print_user_message(f"export successfull - exported {rows} rows. File size: {os.path.getsize(file)} B")
             erh.SilentErrorHandler().log_info(f"CSV from {table_name} download")
         except (sqe.ProgrammingError, AttributeError, TypeError, Exception) as e:
             erh.SilentErrorHandler().log_error(f"Error with file export: {str(e)}")
-            print(f"{date} - Unrecognized error")
+            super()._print_user_message("Unrecognized error")
             return False
         
     def __export(self,format):
         date = super()._get_date()
 
         if not format:
-            print(f"{date} - Invalid format. Export aborted.")
+            super()._print_user_message("Invalid format. Export aborted")
             return False
         
         table_name = self.__selected_table
@@ -330,25 +329,25 @@ class Export(core.Module):
 
         make_file = False
         try:
-            df = pd.read_sql(f"{query}", self.__conn)
+            df = pd.read_sql(f"{query}", self._conn)
             if(len(df) > 1):
                 make_file = True
         except (sqe.ProgrammingError, AttributeError, TypeError, Exception) as e:
             erh.SilentErrorHandler().log_error(f"Error with getting data: {str(e)}")
-            print(f"{date} - Unrecognized error")
+            super()._print_user_message("Unrecognized error")
             return False
         
         if make_file:
-            super()._create_folder(self.__export_folder,f"{date} - Export folder does not exist. Creating it now...")
+            super()._create_folder(self.__export_folder,f"Export folder does not exist. Creating it now...")
             subfolder_name = os.path.join(self.__export_folder, table_name)
-            super()._create_folder(subfolder_name,f"{date} - Creating subfolder '{table_name}...")
+            super()._create_folder(subfolder_name,f"Creating subfolder '{table_name}...")
 
             if format == 1:
                 self.__export_to_excel(subfolder_name,date,table_name,df)
             else:
                 self.__export_to_csv(subfolder_name,date,table_name,df)
         else:
-            print(f"{date} - No data to export")
+            super()._print_user_message("No data to export")
 
         return True
 

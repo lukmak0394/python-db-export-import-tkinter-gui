@@ -1,8 +1,16 @@
 import os
 import datetime
 import SilentErrorHandler as erh
+import Database as db
 
 class Module():
+
+    _conn = None
+
+    def __init__(self):
+        connection =  db.Database().connect()
+        self._conn = connection
+        
 
     def _create_folder(self,folder_path,message):
         if not len(folder_path):
@@ -10,7 +18,7 @@ class Module():
         
         if not os.path.exists(folder_path):
             if len(message):
-                print(message)
+                self._print_user_message(message)
             try:
                 os.mkdir(folder_path)
             except (Exception, AttributeError, TypeError) as e:
