@@ -10,10 +10,7 @@ import mod.Module as core
 
 class Export(core.Module):
 
-    __top_level_window = None
-
     __export_folder = ""
-
     __export_formats = {
         1:"Excel",
         2:"CSV",
@@ -35,7 +32,7 @@ class Export(core.Module):
     def _save_columns(self):
         super()._save_columns()
         self.__display_export_buttons()
-        self.__open_conditions_window(self._selected_columns)
+        self.__open_conditions_window()
 
     def __display_export_buttons(self):
         window = self._root_win
@@ -47,22 +44,11 @@ class Export(core.Module):
             export_format_btn.grid(row=7,column=i, rowspan=2, sticky="nsew")
             i+=1
 
-    def __open_conditions_window(self,cols):
-        refresh = False
+    def __open_conditions_window(self):
+        super()._open_top_window("Set conditions", "550x250")
+        top = self._top_level_window
 
-        if not self.__top_level_window:
-            top = Toplevel(self._root_win)
-            self.__top_level_window = top
-        else:
-            refresh = True
-            top = self.__top_level_window
-            top.update()
-            top.update_idletasks()
-
-        top.title("Set conditions")
-        top.geometry("550x250")
-
-        btn_add_row = Button(top, text="Add next", command=lambda m=top, c=cols: self.__add_conditions_row(m,c), bg="#0d6efd", fg="white")
+        btn_add_row = Button(top, text="Add next", command=lambda m=top: self.__add_conditions_row(m), bg="#0d6efd", fg="white")
         btn_add_row.grid(row=1, column=1, columnspan=4, sticky="nsew")
         submit_button = Button(top, text="Submit", command=self.__submit_query_conditions)
         submit_button.grid(row=2, column=1, columnspan=4, sticky="nsew")
@@ -87,16 +73,16 @@ class Export(core.Module):
             label_value = Label(top, text="Value")
             label_value.grid(row=4, column=4, sticky="nsew")
 
-
-        if bool(refresh):
+        if bool(self._refresh):
             self.__conditions_start_row = 5
 
-        self.__add_conditions_row(top,cols)
+        self.__add_conditions_row(top)
 
         top.mainloop()
     
-    def __add_conditions_row(self,win,columns):
+    def __add_conditions_row(self,win):
         start_row = self.__conditions_start_row
+        columns = self._db_tab_columns
 
         if(start_row == 5):
             conditional_expressions = ["WHERE"]

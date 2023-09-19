@@ -10,12 +10,17 @@ class Module():
 
     _conn = None
     _root_win = None
+    _top_level_window = None
     __tables_listbox = None
     __columns_listbox = None
 
     _db_tables = []
+    _db_tab_columns = []
+
     _selected_table = ""
     _selected_columns = []
+
+    _refresh = False
 
     def __init__(self):
         connection =  db.Database().connect()
@@ -48,6 +53,20 @@ class Module():
         self.__append_db_tables_listbox()
 
         root.mainloop()
+
+    def _open_top_window(self,title,geometry):
+        if not self._top_level_window:
+            top = Toplevel(self._root_win)
+            self._top_level_window = top
+        else:
+            self._refresh = True
+            top = self._top_level_window
+            top.update()
+            top.update_idletasks()
+        
+        top.title(title)
+        top.geometry(geometry)
+    
 
     def __append_db_tables_listbox(self):
         if not self.__tables_listbox or not self.__columns_listbox:
@@ -91,12 +110,12 @@ class Module():
             df = pd.read_sql(query, self._conn)
             print(df["COLUMN_NAME"] + " - " + df["DATA_TYPE"])
 
-
         except (sqe.ProgrammingError, AttributeError, TypeError, Exception) as e:
             erh.SilentErrorHandler().log_error(f"Could not get column names from database: {str(e)}")
             return False
        
         if len(columns):
+            self._db_tab_columns = columns
             window = self._root_win
 
             self.__columns_listbox.delete(0, END)

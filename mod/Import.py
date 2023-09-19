@@ -14,7 +14,6 @@ class Import(core.Module):
     __import_formats = {
         2:".csv",
     }
-
     __import_folder = ""
 
     __files_list_listbox = None
@@ -30,45 +29,41 @@ class Import(core.Module):
 
     def open_import_window(self):
         super()._open_root_window("Import")
-        # self.__root_import_window = Tk()
-        # self.__root_import_window.title("Import")
-        # self.__root_import_window.geometry("300x300")
-        
-        # if not self.__root_import_window:
-        #     return False
-        
-        # if not self.__import_formats or not self.__import_folder:
-        #     return False
-        
-        # win = self.__root_import_window
-
-        # win.columnconfigure(0, weight=1)
-
-        # upload_new_btn = Button(win,text="Upload new file",command=self.__upload_new,bg="#0d6efd", fg="white")
-        # upload_new_btn.grid(column=0,row=2, columnspan=2,sticky="nsew")
-
-        # self.__files_list_listbox = Listbox(win, selectmode=SINGLE)
-        # self.__files_list_listbox.grid(column=0,row=3, columnspan=2, sticky="nsew")
-
-        # date = super()._get_date()
-        # def save_selection():
-        #     try:
-        #         file_list = self.__files_list_listbox
-        #         selection = file_list.curselection()
-        #         file = file_list.get(selection[0])
-        #         self.__selected_file = os.path.join(self.__import_folder,file)
-        #     except (TypeError, AttributeError, Exception) as e:
-        #         erh.SilentErrorHandler.log_error(f"{str(e)}")
-        #         print(f"{date} - Something went wrong, try again")
-
-        # upload_new_btn = Button(win,text="Next step",command=save_selection,bg="#0d6efd", fg="white")
-        # upload_new_btn.grid(column=0,row=4, columnspan=2,sticky="nsew")
-
-        # self.__show_existing_files()
-
-        # win.mainloop()
-        # return True
     
+    def _save_columns(self):
+        super()._save_columns()
+        self.__open_uploader()
+
+    def __open_uploader(self):
+        super()._open_top_window("Upload file", "550x250")
+
+        top = self._top_level_window
+        top.columnconfigure(0, weight=1)
+        upload_new_btn = Button(top,text="Upload new file",command=self.__upload_new,bg="#0d6efd", fg="white")
+        upload_new_btn.grid(column=0,row=1, columnspan=2,sticky="nsew")
+
+        self.__files_list_listbox = Listbox(top, selectmode=SINGLE)
+        self.__files_list_listbox.grid(column=0,row=2, columnspan=2, sticky="nsew")
+
+        date = super()._get_date()
+        def save_selection():
+            try:
+                file_list = self.__files_list_listbox
+                selection = file_list.curselection()
+                file = file_list.get(selection[0])
+                self.__selected_file = os.path.join(self.__import_folder,file)
+                print(self.__selected_file)
+            except (TypeError, AttributeError, Exception) as e:
+                erh.SilentErrorHandler.log_error(f"{str(e)}")
+                print(f"{date} - Something went wrong, try again")
+
+        upload_new_btn = Button(top,text="Import",command=save_selection,bg="#0d6efd", fg="white")
+        upload_new_btn.grid(column=0,row=3, columnspan=2,sticky="nsew")
+
+        self.__show_existing_files()
+
+        top.mainloop()
+
     def __show_existing_files(self):
         files_list = self.__files_list_listbox
         import_folder = self.__import_folder
