@@ -3,7 +3,6 @@ from dotenv import load_dotenv
 from tkinter import *
 from tkinter import ttk
 import pandas as pd
-import datetime
 import sqlalchemy.exc as sqe
 import SilentErrorHandler as erh
 import mod.Module as core

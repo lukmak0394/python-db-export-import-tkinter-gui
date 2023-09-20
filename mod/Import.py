@@ -1,6 +1,5 @@
 import os
 import pandas as pd
-import openpyxl
 from tkinter import *
 from tkinter import filedialog
 from tkinter import ttk
@@ -11,7 +10,7 @@ import SilentErrorHandler as erh
 
 class Import(core.Module):
 
-    __import_formats = {
+    __import_extensions = {
         1:".csv",
     }
     __import_folder = ""
@@ -67,7 +66,7 @@ class Import(core.Module):
     def __show_existing_files(self):
         files_list = self.__files_list_listbox
         import_folder = self.__import_folder
-        import_formats = self.__import_formats
+        import_formats = self.__import_extensions
 
         if not files_list:
             return False
@@ -85,7 +84,7 @@ class Import(core.Module):
         import_folder = self.__import_folder
 
         filetypes = []
-        for key, file_ext in self.__import_formats.items():
+        for key, file_ext in self.__import_extensions.items():
             filetypes.append((f"File types", f"*{file_ext}"))
             
         file_path = filedialog.askopenfilename(filetypes=filetypes, multiple=True)

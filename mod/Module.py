@@ -122,18 +122,26 @@ class Module():
             for column in columns:
                 self.__columns_listbox.insert(END, column)
 
-            save_button = Button(window, text="Select columns", command=self._save_columns)
+            save_button = Button(window, text="Select columns", command=lambda all=0: self._save_columns(all))
             save_button.grid(row=3,column=1,sticky="nsew")
+            
+            save_all_columns = Button(window, text="Select all columns", command=lambda all=1: self._save_columns(all))
+            save_all_columns.grid(row=3,column=2,sticky="nsew")
         
         return True
 
     def _save_columns(self):
         listbox = self.__columns_listbox
         self._selected_columns.clear()
+        if all == 1:
+            self._selected_columns = self._db_tab_columns
+            self._print_user_message(f"selected columns: {str(self._selected_columns)}")
+            return True
         for i in listbox.curselection():
             self._selected_columns.append(listbox.get(i))
             if len(self._selected_columns):
                 self._print_user_message(f"selected columns: {str(self._selected_columns)}")
+                return True
             else:
                  print("Select columns first")
 
