@@ -10,8 +10,8 @@ db_instance.print_connection_info()
 
 def main():
 
-    # exporter.Export().open_window()
-    importer.Import().open_window()
+    exporter.Export().open_window()
+    # importer.Import().open_window()
 
     
 main()

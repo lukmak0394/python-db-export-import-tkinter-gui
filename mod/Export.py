@@ -96,7 +96,7 @@ class Export(core.Module):
         column_select = ttk.Combobox(win,textvariable=selected_col,values=columns, state="readonly")
         column_select.grid(row=start_row,column=2,sticky="nsew")
 
-        operators = ["=", "<>", ">", "<", ">=", "<=", "LIKE %", "% LIKE", "%LIKE%"]
+        operators = ["=", "<>", ">", "<", ">=", "<=", "LIKE %", "% LIKE", "%LIKE%", "IS NULL"]
         selected_operator = StringVar()
         operators_select = ttk.Combobox(win, textvariable=selected_operator, values=operators, state="readonly")
         operators_select.grid(row=start_row,column=3,sticky="nsew")
@@ -129,6 +129,8 @@ class Export(core.Module):
                 val = f"'%{val}'"
             elif operator == "%LIKE%":
                 val = f"'%{val}%'"
+            elif operator == "IS NULL":
+                val = f"'{operator}'"
             else:
                 val = f"'{val}'"
 
