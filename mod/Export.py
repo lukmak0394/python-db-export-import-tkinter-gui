@@ -26,7 +26,7 @@ class Export(core.Module):
         load_dotenv()
 
     def open_window(self):
-        super()._open_root_window("Export data from database")
+        super()._open_root_window("Export data from database", "Columns to be exported")
     
     def _save_columns(self,all=None):
         super()._save_columns(all)

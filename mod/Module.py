@@ -30,7 +30,7 @@ class Module():
             return None
         self._db_tables = tables
     
-    def _open_root_window(self,title):
+    def _open_root_window(self,title, col_title):
         if not self._conn:
             return False
         
@@ -41,7 +41,7 @@ class Module():
 
         label_tables = Label(root, text="Database tables")
         label_tables.grid(row=1, column=0, sticky="nsew")
-        label_columns = Label(root, text="Columns to select")
+        label_columns = Label(root, text=f"{col_title}")
         label_columns.grid(row=1, column=1, sticky="nsew")
 
         self.__tables_listbox = Listbox(root, selectmode=SINGLE)
@@ -122,10 +122,10 @@ class Module():
             for column in columns:
                 self.__columns_listbox.insert(END, column)
                 
-            save_button = Button(window, text="Select columns", command=lambda all=0: self._save_columns(all))
+            save_button = Button(window, text="Save columns selection", command=lambda all=0: self._save_columns(all))
             save_button.grid(row=3,column=1,sticky="nsew")
             
-            save_all_columns = Button(window, text="Select all columns", command=lambda all=1: self._save_columns(all))
+            save_all_columns = Button(window, text="Select all", command=lambda all=1: self._save_columns(all))
             save_all_columns.grid(row=3,column=2,sticky="nsew")
         
         return True

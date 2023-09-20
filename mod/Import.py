@@ -27,7 +27,7 @@ class Import(core.Module):
 
 
     def open_window(self):
-        super()._open_root_window("Import")
+        super()._open_root_window("Import", "Columns to be imported")
     
     def _save_columns(self, all=None):
         super()._save_columns(all)
@@ -85,7 +85,7 @@ class Import(core.Module):
 
         filetypes = []
         for key, file_ext in self.__import_extensions.items():
-            filetypes.append((f"File types", f"*{file_ext}"))
+            filetypes.append((f"File types ({file_ext})", f"*{file_ext}"))
             
         file_path = filedialog.askopenfilename(filetypes=filetypes, multiple=True)
         if file_path:
