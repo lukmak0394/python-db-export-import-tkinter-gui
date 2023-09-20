@@ -130,7 +130,7 @@ class Export(core.Module):
             elif operator == "%LIKE%":
                 val = f"'%{val}%'"
             elif operator == "IS NULL":
-                val = f"'{operator}'"
+                val = ""
             else:
                 val = f"'{val}'"
 
