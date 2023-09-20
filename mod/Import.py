@@ -29,8 +29,8 @@ class Import(core.Module):
     def open_window(self):
         super()._open_root_window("Import")
     
-    def _save_columns(self):
-        super()._save_columns()
+    def _save_columns(self, all=None):
+        super()._save_columns(all)
         self.__open_uploader()
 
     def __open_uploader(self):

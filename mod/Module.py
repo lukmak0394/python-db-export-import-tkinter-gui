@@ -47,7 +47,7 @@ class Module():
         self.__tables_listbox = Listbox(root, selectmode=SINGLE)
         self.__columns_listbox = Listbox(root, selectmode=MULTIPLE)
         self.__tables_listbox.grid(row=2, column=0, sticky="nsew")
-        self.__columns_listbox.grid(row=2, column=1, sticky="nsew")
+        self.__columns_listbox.grid(row=2, column=1, columnspan=2, sticky="nsew")
 
         self.__apply_columns_style()
         self.__append_db_tables_listbox()
@@ -121,7 +121,7 @@ class Module():
             self.__columns_listbox.delete(0, END)
             for column in columns:
                 self.__columns_listbox.insert(END, column)
-
+                
             save_button = Button(window, text="Select columns", command=lambda all=0: self._save_columns(all))
             save_button.grid(row=3,column=1,sticky="nsew")
             
@@ -130,7 +130,7 @@ class Module():
         
         return True
 
-    def _save_columns(self):
+    def _save_columns(self, all = None):
         listbox = self.__columns_listbox
         self._selected_columns.clear()
         if all == 1:

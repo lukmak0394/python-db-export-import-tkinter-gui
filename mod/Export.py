@@ -28,8 +28,8 @@ class Export(core.Module):
     def open_window(self):
         super()._open_root_window("Export data from database")
     
-    def _save_columns(self):
-        super()._save_columns()
+    def _save_columns(self,all=None):
+        super()._save_columns(all)
         self.__display_export_buttons()
         self.__open_conditions_window()
 
